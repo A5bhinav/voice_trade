@@ -77,6 +77,7 @@ Decision rules:
 Always:
 - Use exact symbol strings from the list above.
 - Default size_usd=100, order_type="market", leverage=1 unless specified.
+- Minimum size_usd is $10. If user asks for less, use $10 and note it in the rationale.
 - Never ask clarifying questions. Make your best call.`,
     messages: [{ role: "user", content: text }],
     tools: [

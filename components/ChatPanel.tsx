@@ -144,11 +144,11 @@ export default function ChatPanel() {
       });
       const prevData = await prevRes.json();
       if (!prevRes.ok) {
-        // Validation failed (e.g. size below minimum) — show error, keep proposals visible
+        // Clear proposals so user doesn't keep hitting the same broken command
         setMessages((prev) =>
           prev.map((m) =>
             m.id === msgId
-              ? { ...m, content: prevData.error ?? "Validation failed" }
+              ? { ...m, proposals: undefined, content: `${prevData.error ?? "Validation failed"} — try a new query.` }
               : m
           )
         );
@@ -162,7 +162,11 @@ export default function ChatPanel() {
         )
       );
     } catch {
-      // leave proposals visible so user can retry
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msgId ? { ...m, proposals: undefined, content: "Network error — try again." } : m
+        )
+      );
     } finally {
       setProposalLoading(false);
     }
