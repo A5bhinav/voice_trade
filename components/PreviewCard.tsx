@@ -38,67 +38,60 @@ export default function PreviewCard({ preview, onCancel, onExecuted }: PreviewCa
   if (receipt) return <TradeReceipt receipt={receipt} />;
 
   return (
-    <div className="rounded-2xl p-5 mt-2 mb-2 max-w-sm" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-      <div className="flex items-center gap-3 mb-4 pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
+    <div className="rounded-xl overflow-hidden w-full max-w-sm" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+      {/* Header */}
+      <div className="flex items-center gap-2.5 px-4 py-3" style={{ borderBottom: "1px solid var(--border)", background: "var(--surface-2)" }}>
         <span
-          className="px-2 py-0.5 text-[10px] rounded-full uppercase font-bold tracking-wider"
-          style={{ background: "rgba(74,144,217,0.15)", color: "var(--accent)", border: "1px solid rgba(74,144,217,0.3)" }}
+          className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+          style={{ background: "var(--blue-dim)", color: "var(--blue-bright)", border: "1px solid rgba(61,127,255,0.25)" }}
         >
           {preview.type}
         </span>
-        <span className="font-bold text-[14px]" style={{ color: "var(--foreground)" }}>{preview.summary}</span>
+        <span className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>{preview.summary}</span>
       </div>
 
-      <div className="space-y-2 mb-4">
+      {/* Details */}
+      <div className="px-4 py-3 space-y-1.5">
         {Object.entries(preview.details).map(([k, v]) => (
-          <div
-            key={k}
-            className="flex justify-between items-center px-3 py-2 rounded-xl"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}
-          >
-            <span className="capitalize text-[11px] font-bold tracking-wide" style={{ color: "var(--text-secondary)" }}>
+          <div key={k} className="flex items-center justify-between">
+            <span className="text-[10px] font-medium capitalize" style={{ color: "var(--text-3)" }}>
               {k.replace(/_/g, " ")}
             </span>
-            <span className="font-bold text-[13px]" style={{ color: "var(--foreground)" }}>{v}</span>
+            <span className="text-[12px] font-semibold font-mono" style={{ color: "var(--text)" }}>{v}</span>
           </div>
         ))}
       </div>
 
+      {/* Warnings */}
       {preview.warnings.length > 0 && (
-        <div className="mb-4 space-y-2 p-3 rounded-xl" style={{ background: "rgba(255,160,0,0.08)", border: "1px solid rgba(255,160,0,0.2)" }}>
-          <span className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: "#ffb347" }}>
-            Warnings
-          </span>
+        <div className="mx-4 mb-3 rounded-lg px-3 py-2.5 space-y-1" style={{ background: "var(--amber-dim)", border: "1px solid rgba(240,174,48,0.25)" }}>
+          <span className="text-[9px] font-bold uppercase tracking-widest block" style={{ color: "var(--amber)" }}>Warnings</span>
           {preview.warnings.map((w, i) => (
-            <div key={i} className="text-[12px] font-semibold flex gap-2" style={{ color: "#ffcc77" }}>
-              <span>⚠</span> <span>{w}</span>
+            <div key={i} className="text-[11px] font-medium flex gap-1.5" style={{ color: "var(--amber)" }}>
+              <span>&#9888;</span><span>{w}</span>
             </div>
           ))}
         </div>
       )}
 
       {error && (
-        <div className="text-[12px] font-bold mb-3 text-center py-2 rounded-lg" style={{ color: "#ff6b6b", background: "rgba(255,68,68,0.08)", border: "1px solid rgba(255,68,68,0.2)" }}>
+        <div className="mx-4 mb-3 rounded-lg px-3 py-2 text-[11px] font-medium text-center"
+          style={{ background: "var(--red-dim)", color: "var(--red)", border: "1px solid rgba(240,69,69,0.25)" }}>
           {error}
         </div>
       )}
 
-      <div className="flex gap-2">
-        <button
-          onClick={onCancel}
-          disabled={loading}
-          className="flex-1 py-3 rounded-full text-[13px] font-bold transition-colors disabled:opacity-50"
-          style={{ background: "rgba(255,255,255,0.06)", color: "var(--foreground)", border: "1px solid var(--card-border)" }}
-        >
+      {/* Actions */}
+      <div className="flex gap-2 px-4 pb-4">
+        <button onClick={onCancel} disabled={loading}
+          className="flex-1 py-2.5 rounded-lg text-[12px] font-semibold transition-all disabled:opacity-40"
+          style={{ background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
           Cancel
         </button>
-        <button
-          onClick={handleConfirm}
-          disabled={loading}
-          className="flex-1 py-3 rounded-full text-[13px] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "var(--accent)", color: "#05080f" }}
-        >
-          {loading ? "Executing…" : "Confirm"}
+        <button onClick={handleConfirm} disabled={loading}
+          className="flex-1 py-2.5 rounded-lg text-[12px] font-semibold transition-all disabled:opacity-40"
+          style={{ background: "var(--blue)", color: "#fff", boxShadow: "0 2px 10px rgba(61,127,255,0.3)" }}>
+          {loading ? "Executing\u2026" : "Confirm"}
         </button>
       </div>
     </div>

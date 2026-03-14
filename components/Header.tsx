@@ -8,23 +8,32 @@ interface HeaderProps {
 
 export default function Header({ lastSyncAt }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-8 py-5 z-20" style={{ background: "var(--card-bg)", borderBottom: "1px solid var(--card-border)" }}>
-      <div className="flex items-center gap-4">
-        <h1 className="text-xl font-black tracking-tight" style={{ color: "var(--accent)" }}>VOICE TRADE</h1>
-        <div className="flex items-center px-3 py-1 rounded-full" style={{ background: "rgba(74,144,217,0.08)", border: "1px solid rgba(74,144,217,0.2)" }}>
-          <div className="w-2 h-2 rounded-full mr-2" style={{ background: "var(--accent)", boxShadow: "0 0 6px var(--accent)", animation: "pulse 2s ease-in-out infinite" }} />
-          <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--accent)" }}>Live</span>
+    <header
+      className="flex items-center justify-between px-6 shrink-0"
+      style={{ height: "56px", background: "var(--surface)", borderBottom: "1px solid var(--border)" }}
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-[15px] font-black tracking-[0.12em] uppercase" style={{ color: "var(--blue-bright)" }}>
+          VoiceTrade
+        </span>
+        <div
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest"
+          style={{ background: "var(--blue-dim)", border: "1px solid rgba(61,127,255,0.25)", color: "var(--blue-bright)" }}
+        >
+          <span className="live-dot w-1.5 h-1.5 rounded-full inline-block" style={{ background: "var(--blue-bright)" }} />
+          Live
         </div>
       </div>
-      <div className="flex items-center gap-6 text-xs font-medium">
-        <div className="flex flex-col items-end">
-          <span className="uppercase text-[10px] tracking-wider" style={{ color: "var(--text-secondary)" }}>Max Order</span>
-          <span className="text-sm font-bold" style={{ color: "var(--foreground)" }}>${MAX_ORDER_USD}</span>
+
+      <div className="flex items-center gap-6">
+        <div className="flex flex-col items-end gap-0.5">
+          <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-3)" }}>Max Order</span>
+          <span className="text-[13px] font-semibold font-mono" style={{ color: "var(--text)" }}>${MAX_ORDER_USD}</span>
         </div>
         {lastSyncAt && (
-          <div className="flex flex-col items-end pl-6" style={{ borderLeft: "1px solid var(--card-border)" }}>
-            <span className="uppercase text-[10px] tracking-wider" style={{ color: "var(--text-secondary)" }}>Synced</span>
-            <span className="text-sm font-bold" style={{ color: "var(--foreground)" }}>{lastSyncAt}</span>
+          <div className="flex flex-col items-end gap-0.5 pl-5" style={{ borderLeft: "1px solid var(--border)" }}>
+            <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-3)" }}>Synced</span>
+            <span className="text-[13px] font-semibold font-mono" style={{ color: "var(--text)" }}>{lastSyncAt}</span>
           </div>
         )}
       </div>

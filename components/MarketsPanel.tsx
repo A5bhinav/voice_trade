@@ -16,50 +16,44 @@ export default function MarketsPanel() {
       try {
         const res = await fetch("/api/markets");
         if (!res.ok) return;
-        const data = await res.json();
-        setTickers(data);
-      } catch (err) {
-        console.error("Failed to fetch markets", err);
-      } finally {
-        setLoading(false);
-      }
+        setTickers(await res.json());
+      } catch { /* silent */ }
+      finally { setLoading(false); }
     }
     fetchMarkets();
-    const interval = setInterval(fetchMarkets, 10_000);
-    return () => clearInterval(interval);
+    const id = setInterval(fetchMarkets, 10_000);
+    return () => clearInterval(id);
   }, []);
 
   if (loading && tickers.length === 0) {
-    return (
-      <div className="rounded-2xl p-5" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-        <div className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Loading markets…</div>
-      </div>
-    );
+    return <SectionCard label="Live Markets"><div className="text-[12px]" style={{ color: "var(--text-3)" }}>Loading&hellip;</div></SectionCard>;
   }
-
   if (tickers.length === 0) return null;
 
   return (
-    <div className="rounded-2xl p-5 space-y-4" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-      <h3 className="text-[11px] font-black uppercase tracking-widest" style={{ color: "var(--accent)" }}>
-        Live Markets
-      </h3>
-      <div className="flex justify-between items-center gap-2">
+    <SectionCard label="Live Markets">
+      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${tickers.length}, 1fr)` }}>
         {tickers.map((t) => (
-          <div
-            key={t.symbol}
-            className="flex-1 text-center rounded-xl py-3"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}
-          >
-            <div className="text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
+          <div key={t.symbol} className="flex flex-col items-center gap-1 rounded-lg py-3"
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+            <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-3)" }}>
               {t.symbol.replace("-PERP", "")}
-            </div>
-            <div className="text-[14px] font-black" style={{ color: "var(--foreground)" }}>
+            </span>
+            <span className="text-[13px] font-semibold font-mono" style={{ color: "var(--text)" }}>
               {t.price !== null ? `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 1 })}` : "---"}
-            </div>
+            </span>
           </div>
         ))}
       </div>
+    </SectionCard>
+  );
+}
+
+function SectionCard({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl p-4 space-y-3" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+      <h3 className="text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-3)" }}>{label}</h3>
+      {children}
     </div>
   );
 }

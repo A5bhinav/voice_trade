@@ -36,29 +36,28 @@ export default function Home() {
   }, [fetchPortfolio]);
 
   return (
-    <div className="flex flex-col h-screen w-screen font-sans" style={{ background: "var(--background)", color: "var(--foreground)" }}>
-      <div className="flex flex-col h-full w-full overflow-hidden" style={{ background: "var(--background)" }}>
-        <Header lastSyncAt={lastSyncAt} />
+    <div className="flex flex-col w-screen h-screen overflow-hidden" style={{ background: "var(--bg)", color: "var(--text)" }}>
+      <Header lastSyncAt={lastSyncAt} />
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Left column: chat + voice */}
-          <div className="flex flex-col flex-1 z-10" style={{ borderRight: "1px solid var(--card-border)", background: "var(--background)" }}>
-            <ChatPanel />
-          </div>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left: chat + voice input */}
+        <div className="flex flex-col flex-1 overflow-hidden" style={{ borderRight: "1px solid var(--border)" }}>
+          <ChatPanel />
+        </div>
 
-          {/* Right column: context (portfolio, markets, actions) */}
-          <div className="w-[340px] flex flex-col gap-4 p-4 overflow-y-auto" style={{ background: "var(--background)" }}>
-            <MarketsPanel />
-            <PortfolioPanel portfolio={portfolio} loading={portfolioLoading} />
-            <RiskControls />
-            <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--card-border)" }}>
-               <PanicButton
-                 armed={panicArmed}
-                 onArmToggle={() => setPanicArmed((a) => !a)}
-                 onPanicComplete={fetchPortfolio}
-               />
-            </div>
-          </div>
+        {/* Right: data sidebar */}
+        <div
+          className="w-80 flex flex-col gap-3 p-4 overflow-y-auto shrink-0"
+          style={{ background: "var(--bg)" }}
+        >
+          <MarketsPanel />
+          <PortfolioPanel portfolio={portfolio} loading={portfolioLoading} />
+          <RiskControls />
+          <PanicButton
+            armed={panicArmed}
+            onArmToggle={() => setPanicArmed((a) => !a)}
+            onPanicComplete={fetchPortfolio}
+          />
         </div>
       </div>
     </div>
