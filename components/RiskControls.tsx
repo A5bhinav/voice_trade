@@ -3,24 +3,26 @@
 import { MAX_ORDER_USD, MAX_LEVERAGE, DAILY_LOSS_LIMIT_USD } from "@/lib/constants";
 
 export default function RiskControls() {
+  const rows = [
+    { label: "Max order size", value: `$${MAX_ORDER_USD}` },
+    { label: "Max leverage",   value: `${MAX_LEVERAGE}x` },
+    { label: "Daily loss cap", value: `$${DAILY_LOSS_LIMIT_USD}` },
+  ];
+
   return (
-    <div className="rounded-2xl p-5" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-      <h3 className="text-[11px] font-black uppercase tracking-widest mb-5" style={{ color: "var(--accent)" }}>
-        Risk Profile
-      </h3>
-      <div className="space-y-3">
-        <div className="flex justify-between items-center pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
-          <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-secondary)" }}>Max order size</span>
-          <span className="text-[14px] font-black" style={{ color: "var(--foreground)" }}>${MAX_ORDER_USD}</span>
-        </div>
-        <div className="flex justify-between items-center pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
-          <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-secondary)" }}>Max leverage</span>
-          <span className="text-[14px] font-black" style={{ color: "var(--foreground)" }}>{MAX_LEVERAGE}x</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-secondary)" }}>Daily loss cap</span>
-          <span className="text-[14px] font-black" style={{ color: "var(--foreground)" }}>${DAILY_LOSS_LIMIT_USD}</span>
-        </div>
+    <div className="rounded-xl p-4 space-y-3" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+      <h3 className="text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-3)" }}>Risk Profile</h3>
+      <div className="space-y-0">
+        {rows.map((r, i) => (
+          <div
+            key={r.label}
+            className="flex items-center justify-between py-2.5"
+            style={{ borderBottom: i < rows.length - 1 ? "1px solid var(--border)" : "none" }}
+          >
+            <span className="text-[11px] font-medium" style={{ color: "var(--text-2)" }}>{r.label}</span>
+            <span className="text-[13px] font-semibold font-mono" style={{ color: "var(--text)" }}>{r.value}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
