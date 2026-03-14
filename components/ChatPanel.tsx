@@ -12,8 +12,7 @@ import type {
 import PreviewCard from "./PreviewCard";
 import RebalancePlan from "./RebalancePlan";
 import TradeReceipt from "./TradeReceipt";
-import ProposalSetView from "./ProposalSetView";
-import VoiceInput from "./VoiceInput";
+import VoiceMic from "./VoiceInput";
 
 interface Message {
   id: string;
@@ -34,23 +33,29 @@ function isTradePlan(cmd: ParseResponse): cmd is TradePlan {
 function isProposalSet(cmd: ParseResponse): cmd is ProposalSet {
   return "proposals" in cmd && Array.isArray((cmd as ProposalSet).proposals);
 }
-
 function isClarification(cmd: ParseResponse): cmd is { clarification_needed: string } {
   return "clarification_needed" in cmd;
 }
 
 export default function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: "0", role: "system", content: "Voice Trade ready. Type a command or use push-to-talk." },
+    { id: "0", role: "system", content: "Voice Trade ready. Type a command or hold the mic to speak." },
   ]);
   const [input, setInput] = useState("");
+  const [listening, setListening] = useState(false);
   const [loading, setLoading] = useState(false);
   const [proposalLoading, setProposalLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // When voice releases, focus the input so the user can immediately edit
+  useEffect(() => {
+    if (!listening && input) inputRef.current?.focus();
+  }, [listening]);
 
   function addMessage(msg: Omit<Message, "id">) {
     setMessages((prev) => [...prev, { ...msg, id: crypto.randomUUID() }]);
@@ -67,6 +72,7 @@ export default function ChatPanel() {
   async function handleSubmit(text: string) {
     if (!text.trim() || loading) return;
     setLoading(true);
+    setInput("");
     addMessage({ role: "user", content: text });
     addMessage({ role: "assistant", content: "Analyzing markets…" });
 
@@ -179,23 +185,23 @@ export default function ChatPanel() {
       )
     );
   }
-
   function handleExecuted(msgId: string, receipt: ExecutionReceipt) {
     setMessages((prev) =>
       prev.map((m) => m.id === msgId ? { ...m, preview: undefined, receipt } : m)
     );
   }
-
   function handleRebalanceExecuted(msgId: string, receipts: ExecutionReceipt[]) {
     setMessages((prev) =>
       prev.map((m) => m.id === msgId ? { ...m, plan: undefined, planToken: undefined, receipts } : m)
     );
   }
 
+  const canSend = input.trim().length > 0 && !loading && !listening;
+
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: "var(--bg)" }}>
 
-      {/* Messages */}
+      {/* ── Messages ── */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
         {messages.map((msg) => (
           <div key={msg.id} className={`msg-in flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -210,22 +216,13 @@ export default function ChatPanel() {
                   <div className="h-px flex-1" style={{ background: "var(--border)" }} />
                 </div>
               ) : msg.role === "user" ? (
-                <div
-                  className="px-4 py-2.5 rounded-2xl rounded-br-sm text-[14px] leading-relaxed"
-                  style={{ background: "var(--blue)", color: "#fff", boxShadow: "0 2px 12px rgba(61,127,255,0.25)" }}
-                >
+                <div className="px-4 py-2.5 rounded-2xl rounded-br-sm text-[14px] leading-relaxed"
+                  style={{ background: "var(--blue)", color: "#fff", boxShadow: "0 2px 12px rgba(61,127,255,0.25)" }}>
                   {msg.content}
                 </div>
               ) : (
-                <div
-                  className="px-4 py-2.5 rounded-2xl rounded-bl-sm text-[14px] leading-relaxed"
-                  style={{
-                    background: "var(--surface)",
-                    color: "var(--text)",
-                    border: "1px solid var(--border)",
-                    borderLeft: "2px solid var(--blue)",
-                  }}
-                >
+                <div className="px-4 py-2.5 rounded-2xl rounded-bl-sm text-[14px] leading-relaxed"
+                  style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--border)", borderLeft: "2px solid var(--blue)" }}>
                   {msg.content}
                 </div>
               )}
@@ -242,28 +239,15 @@ export default function ChatPanel() {
               )}
 
               {msg.preview && (
-                <div className="w-full">
-                  <PreviewCard
-                    preview={msg.preview}
-                    onCancel={() => handleCancelPreview(msg.id)}
-                    onExecuted={(receipt) => handleExecuted(msg.id, receipt)}
-                  />
-                </div>
+                <PreviewCard preview={msg.preview} onCancel={() => handleCancelPreview(msg.id)} onExecuted={(r) => handleExecuted(msg.id, r)} />
               )}
 
               {msg.plan && msg.planToken && (
-                <RebalancePlan
-                  plan={msg.plan}
-                  confirmationToken={msg.planToken}
-                  onExecuted={(rs) => handleRebalanceExecuted(msg.id, rs)}
-                  onCancel={() => handleCancelPreview(msg.id)}
-                />
+                <RebalancePlan plan={msg.plan} confirmationToken={msg.planToken} onExecuted={(rs) => handleRebalanceExecuted(msg.id, rs)} onCancel={() => handleCancelPreview(msg.id)} />
               )}
               {msg.receipt && <TradeReceipt receipt={msg.receipt} />}
               {msg.receipts && (
-                <div className="space-y-2 w-full">
-                  {msg.receipts.map((r) => <TradeReceipt key={r.id} receipt={r} />)}
-                </div>
+                <div className="space-y-2 w-full">{msg.receipts.map((r) => <TradeReceipt key={r.id} receipt={r} />)}</div>
               )}
             </div>
           </div>
@@ -271,38 +255,84 @@ export default function ChatPanel() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Bottom input bar */}
-      <div
-        className="shrink-0 px-5 py-4 flex flex-col gap-4"
-        style={{ background: "var(--surface)", borderTop: "1px solid var(--border)" }}
-      >
-        <VoiceInput
-          onTranscript={(text) => { setInput(text); handleSubmit(text); }}
-          disabled={loading}
-        />
+      {/* ── Input bar ── */}
+      <div className="shrink-0 px-4 py-3" style={{ background: "var(--surface)", borderTop: "1px solid var(--border)" }}>
+
+        {/* Status hint above input when listening */}
+        {listening && (
+          <div className="mb-2 text-center">
+            <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--blue-bright)" }}>
+              Listening\u2026 release to stop
+            </span>
+          </div>
+        )}
+
         <form
-          onSubmit={(e) => { e.preventDefault(); handleSubmit(input); setInput(""); }}
+          onSubmit={(e) => { e.preventDefault(); handleSubmit(input); }}
           className="flex items-center gap-2"
         >
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a trade idea…"
+          {/* Mic button */}
+          <VoiceMic
+            listening={listening}
+            onListeningChange={setListening}
+            onTranscript={setInput}
             disabled={loading}
-            className="flex-1 rounded-xl px-4 py-2.5 text-[13px] outline-none transition-all disabled:opacity-50"
-            style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(61,127,255,0.5)")}
-            onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
           />
+
+          {/* Text input — voice fills this, user can edit freely */}
+          <div className="relative flex-1">
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={listening ? "Speak now\u2026" : "Type a command or hold mic to speak"}
+              disabled={loading}
+              className="w-full rounded-xl px-4 py-2.5 text-[13px] outline-none transition-all duration-150 disabled:opacity-50"
+              style={{
+                background: "var(--surface-2)",
+                color: "var(--text)",
+                border: listening
+                  ? "1.5px solid rgba(61,127,255,0.6)"
+                  : "1px solid var(--border)",
+                boxShadow: listening ? "0 0 0 3px rgba(61,127,255,0.1)" : "none",
+              }}
+            />
+          </div>
+
+          {/* Send button — always visible */}
           <button
             type="submit"
-            disabled={loading || !input.trim()}
-            className="px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all disabled:opacity-30"
-            style={{ background: "var(--blue)", color: "#fff" }}
+            disabled={!canSend}
+            className="shrink-0 flex items-center justify-center rounded-xl text-[13px] font-semibold transition-all duration-150"
+            style={{
+              width: 42,
+              height: 42,
+              background: canSend ? "var(--blue)" : "var(--surface-2)",
+              color: canSend ? "#fff" : "var(--text-3)",
+              border: canSend ? "none" : "1px solid var(--border)",
+              boxShadow: canSend ? "0 2px 10px rgba(61,127,255,0.35)" : "none",
+              cursor: canSend ? "pointer" : "not-allowed",
+            }}
+            aria-label="Send"
           >
-            {loading ? "\u2026" : "Send"}
+            {loading ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
+                  <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite" />
+                </path>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            )}
           </button>
         </form>
+
+        <p className="mt-2 text-center text-[10px]" style={{ color: "var(--text-3)" }}>
+          Hold mic &middot; Edit transcript &middot; Press Enter or &uarr; to send
+        </p>
       </div>
     </div>
   );
