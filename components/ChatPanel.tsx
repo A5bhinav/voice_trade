@@ -12,6 +12,7 @@ import type {
 import PreviewCard from "./PreviewCard";
 import RebalancePlan from "./RebalancePlan";
 import TradeReceipt from "./TradeReceipt";
+import ProposalSetView from "./ProposalSetView";
 import VoiceMic from "./VoiceInput";
 import ProposalSetView from "./ProposalSetView";
 
@@ -40,7 +41,7 @@ function isClarification(cmd: ParseResponse): cmd is { clarification_needed: str
 
 export default function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: "0", role: "system", content: "Voice Trade ready. Type a command or hold the mic to speak." },
+    { id: "0", role: "system", content: "Pulse ready. Type a command or hold the mic to speak." },
   ]);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
@@ -56,7 +57,7 @@ export default function ChatPanel() {
   // When voice releases, focus the input so the user can immediately edit
   useEffect(() => {
     if (!listening && input) inputRef.current?.focus();
-  }, [listening]);
+  }, [listening, input]);
 
   function addMessage(msg: Omit<Message, "id">) {
     setMessages((prev) => [...prev, { ...msg, id: crypto.randomUUID() }]);

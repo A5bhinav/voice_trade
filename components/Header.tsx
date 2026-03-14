@@ -14,7 +14,7 @@ export default function Header({ lastSyncAt }: HeaderProps) {
     >
       <div className="flex items-center gap-3">
         <span className="text-[15px] font-black tracking-[0.12em] uppercase" style={{ color: "var(--blue-bright)" }}>
-          VoiceTrade
+          Pulse
         </span>
         <div
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest"

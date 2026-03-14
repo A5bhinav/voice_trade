@@ -17,6 +17,28 @@ export default function PortfolioPanel({ portfolio, loading }: PortfolioPanelPro
   }
   if (!portfolio) return null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isOffline = (portfolio as any).offline === true;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const offlineReason: string = (portfolio as any).offlineReason ?? "";
+
+  if (isOffline) {
+    return (
+      <Card label="Portfolio">
+        <div className="rounded-lg px-3 py-2.5 space-y-1" style={{ background: "var(--red-dim)", border: "1px solid rgba(240,69,69,0.25)" }}>
+          <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--red)" }}>
+            Exchange Offline
+          </div>
+          <div className="text-[11px] font-medium leading-snug" style={{ color: "var(--text-2)" }}>
+            {offlineReason.includes("EXPIRED_TIMESTAMP") || offlineReason.includes("401")
+              ? "API keys are expired or invalid. Generate new keys in your exchange account."
+              : offlineReason || "Cannot reach exchange. Check your API keys and connection."}
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   const { account, positions, open_orders } = portfolio;
 
   return (
