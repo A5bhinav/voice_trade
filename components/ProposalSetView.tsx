@@ -70,7 +70,7 @@ export default function ProposalSetView({ proposalSet, onSelect, onCancel, loadi
               onClick={() => onSelect(p.command)}
               disabled={loading}
               className="w-full py-2 rounded-full text-[12px] font-bold transition-colors disabled:opacity-40"
-              style={{ background: "var(--accent)", color: "#05080f" }}
+              style={{ background: "var(--accent)", color: "#fff" }}
             >
               {loading ? "Loading…" : "Preview trade"}
             </button>

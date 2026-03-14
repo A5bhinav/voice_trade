@@ -6,7 +6,9 @@ interface PendingCommand {
   expires: number;
 }
 
-const store = new Map<string, PendingCommand>();
+// Persist across Next.js hot reloads in dev (module re-evaluation wipes plain Maps)
+const g = global as typeof global & { _pendingCommands?: Map<string, PendingCommand> };
+const store: Map<string, PendingCommand> = g._pendingCommands ?? (g._pendingCommands = new Map());
 
 export function storePendingCommand(command: TradeCommand | TradePlan): string {
   const token = crypto.randomUUID();

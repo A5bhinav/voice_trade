@@ -94,11 +94,7 @@ function buildHeaders(method: string, path: string, body = ""): HeadersInit {
     ? queryString.split("&").sort().join("&")
     : "";
 
-  // SHA-256 hash of body (sorted JSON keys to match Python's sort_keys=True)
-  const canonicalBody = body
-    ? JSON.stringify(JSON.parse(body), Object.keys(JSON.parse(body)).sort())
-    : "";
-  const bodyHash = createHash("sha256").update(canonicalBody).digest("hex");
+  const bodyHash = createHash("sha256").update(body).digest("hex");
 
   const message = [timestamp, nonce, method.toUpperCase(), canonicalPath, canonicalQuery, bodyHash].join("\n");
   const signature = createHmac("sha256", apiSecret).update(message).digest("hex");
@@ -120,15 +116,27 @@ interface LiquidResponse<T> {
   error?: { code: string; message: string };
 }
 
+function sortedJson(obj: object): string {
+  const sorted = Object.keys(obj).sort().reduce((acc, k) => {
+    (acc as Record<string, unknown>)[k] = (obj as Record<string, unknown>)[k];
+    return acc;
+  }, {} as object);
+  return JSON.stringify(sorted);
+}
+
 async function call<T>(method: "GET" | "POST" | "DELETE" | "PATCH", path: string, body?: object): Promise<T> {
-  const bodyStr = body ? JSON.stringify(body) : "";
+  const bodyStr = body ? sortedJson(body) : "";
   const fullPath = `${BASE_PATH}${path}`; // e.g. /v1/markets — used for signing
   const res = await fetch(`${BASE_HOST}${fullPath}`, {
     method,
     headers: buildHeaders(method, fullPath, bodyStr),
     body: bodyStr || undefined,
-    signal: AbortSignal.timeout(8000), // 8s hard timeout per request
+    signal: AbortSignal.timeout(60000),
   });
+  const contentType = res.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    throw new Error(`Liquid API returned ${res.status} ${res.statusText} (non-JSON)`);
+  }
   const json = await res.json() as LiquidResponse<T>;
   if (!json.success) throw new Error(json.error?.message ?? `Liquid error on ${path}`);
   return json.data;

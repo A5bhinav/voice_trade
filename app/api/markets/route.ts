@@ -4,12 +4,10 @@ import { LiquidClient } from "@/lib/liquid";
 export async function GET() {
   try {
     const markets = await LiquidClient.getMarkets();
-    const assetsToTrack = ["BTC-PERP", "ETH-PERP", "SOL-PERP"];
-    const filtered = markets.filter(m => assetsToTrack.includes(m.symbol));
-    
-    // Fetch tickers in parallel
+
+    // Fetch tickers in parallel for all markets
     const tickers = await Promise.all(
-      filtered.map(async (m) => {
+      markets.map(async (m) => {
         try {
           const t = await LiquidClient.getTicker(m.symbol);
           return { symbol: m.symbol, price: t.last_price };

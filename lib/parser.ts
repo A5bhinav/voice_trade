@@ -28,9 +28,11 @@ export async function parseCommand(text: string): Promise<ParseResult> {
     const { markets, context } = await LiquidClient.getMarketWithPrices();
     if (markets.length > 0) {
       marketContext = context;
+    } else {
+      console.warn("[parser] getMarketWithPrices returned 0 markets — using fallback");
     }
-  } catch {
-    // fall back to minimal context if Liquid is unreachable
+  } catch (err) {
+    console.error("[parser] Failed to fetch markets from Liquid — using fallback:", err);
   }
 
   const anthropic = new Anthropic({
@@ -76,8 +78,8 @@ Decision rules:
 
 Always:
 - Use exact symbol strings from the list above.
-- Default size_usd=100, order_type="market", leverage=1 unless specified.
-- Minimum size_usd is $10. If user asks for less, use $10 and note it in the rationale.
+- Default size_usd=11, order_type="market", leverage=1 unless specified.
+- Minimum size_usd is $11. If user asks for less, use $11 and note it in the rationale.
 - Never ask clarifying questions. Make your best call.`,
     messages: [{ role: "user", content: text }],
     tools: [

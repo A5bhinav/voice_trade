@@ -13,6 +13,7 @@ import PreviewCard from "./PreviewCard";
 import RebalancePlan from "./RebalancePlan";
 import TradeReceipt from "./TradeReceipt";
 import VoiceMic from "./VoiceInput";
+import ProposalSetView from "./ProposalSetView";
 
 interface Message {
   id: string;
