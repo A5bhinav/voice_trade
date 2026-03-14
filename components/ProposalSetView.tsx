@@ -20,72 +20,59 @@ function commandLabel(cmd: TradeCommand): string {
 
 export default function ProposalSetView({ proposalSet, onSelect, onCancel, loading }: Props) {
   return (
-    <div
-      className="rounded-2xl p-5 mt-2 mb-2 space-y-4 max-w-sm"
-      style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
-    >
-      {/* Intent header */}
-      <div>
-        <span
-          className="px-2 py-0.5 text-[10px] rounded-full uppercase font-bold tracking-wider mr-2"
-          style={{ background: "rgba(61,255,124,0.12)", color: "var(--accent)", border: "1px solid rgba(61,255,124,0.25)" }}
-        >
-          Intent detected
+    <div className="rounded-xl overflow-hidden w-full max-w-sm" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+      {/* Header */}
+      <div className="px-4 py-3" style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
+        <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--blue-bright)" }}>
+          Intent Detected
         </span>
-        <p className="mt-2 text-[14px] font-semibold leading-snug" style={{ color: "var(--foreground)" }}>
+        <p className="mt-1 text-[13px] font-semibold leading-snug" style={{ color: "var(--text)" }}>
           {proposalSet.user_intent}
         </p>
       </div>
 
-      <div style={{ borderTop: "1px solid var(--card-border)" }} />
-
       {/* Proposals */}
-      <div className="space-y-3">
-        <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+      <div className="px-4 py-3 space-y-2">
+        <p className="text-[9px] font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-3)" }}>
           Matching trades
         </p>
         {proposalSet.proposals.map((p, i) => (
-          <div
-            key={i}
-            className="rounded-xl p-4 space-y-2"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}
-          >
+          <div key={i} className="rounded-lg p-3 space-y-2"
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>
             <div className="flex items-center justify-between gap-2">
-              <span className="font-bold text-[13px]" style={{ color: "var(--foreground)" }}>
+              <span className="font-semibold text-[13px]" style={{ color: "var(--text)" }}>
                 {commandLabel(p.command)}
               </span>
               {i === 0 && (
-                <span
-                  className="px-1.5 py-0.5 text-[9px] rounded-full uppercase font-bold tracking-wider shrink-0"
-                  style={{ background: "rgba(61,255,124,0.12)", color: "var(--accent)", border: "1px solid rgba(61,255,124,0.25)" }}
-                >
+                <span className="px-1.5 py-0.5 text-[9px] rounded font-bold uppercase tracking-wider shrink-0"
+                  style={{ background: "var(--blue-dim)", color: "var(--blue-bright)", border: "1px solid rgba(61,127,255,0.25)" }}>
                   Best fit
                 </span>
               )}
             </div>
-            <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            <p className="text-[11px] leading-relaxed" style={{ color: "var(--text-2)" }}>
               {p.rationale}
             </p>
             <button
               onClick={() => onSelect(p.command)}
               disabled={loading}
-              className="w-full py-2 rounded-full text-[12px] font-bold transition-colors disabled:opacity-40"
-              style={{ background: "var(--accent)", color: "#05080f" }}
+              className="w-full py-2 rounded-lg text-[12px] font-semibold transition-all disabled:opacity-40"
+              style={{ background: "var(--blue)", color: "#fff", boxShadow: "0 2px 8px rgba(61,127,255,0.3)" }}
             >
-              {loading ? "Loading…" : "Preview trade"}
+              {loading ? "Loading\u2026" : "Preview trade"}
             </button>
           </div>
         ))}
       </div>
 
-      <button
-        onClick={onCancel}
-        disabled={loading}
-        className="w-full py-2 rounded-full text-[12px] font-bold"
-        style={{ background: "rgba(255,255,255,0.06)", color: "var(--foreground)", border: "1px solid var(--card-border)" }}
-      >
-        Dismiss
-      </button>
+      {/* Dismiss */}
+      <div className="px-4 pb-4">
+        <button onClick={onCancel} disabled={loading}
+          className="w-full py-2 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+          style={{ background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
+          Dismiss
+        </button>
+      </div>
     </div>
   );
 }

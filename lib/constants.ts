@@ -6,4 +6,4 @@ export const SUPPORTED_SYMBOLS = ["BTC-PERP", "ETH-PERP", "SOL-PERP"];
 export const PANIC_KEYWORDS = ["panic", "close all", "flatten", "emergency"];
 export const CONFIRMATION_TOKEN_TTL_MS = 60_000;
 export const MUTATION_DELAY_MS = 300;
-export const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || "./audit.jsonl";
+export const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || "/tmp/audit.jsonl";

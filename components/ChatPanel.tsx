@@ -12,6 +12,7 @@ import type {
 import PreviewCard from "./PreviewCard";
 import RebalancePlan from "./RebalancePlan";
 import TradeReceipt from "./TradeReceipt";
+import ProposalSetView from "./ProposalSetView";
 import VoiceMic from "./VoiceInput";
 
 interface Message {
