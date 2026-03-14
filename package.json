@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p ${PORT:-3000}",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -13,6 +13,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.3",
     "next": "16.1.6",
+    "openai": "^6.29.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

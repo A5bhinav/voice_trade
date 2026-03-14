@@ -6,6 +6,7 @@
  * Mutations are never auto-retried.
  */
 
+import { createHmac } from "crypto";
 import { PortfolioSnapshot } from "./types";
 
 const BASE_URL = process.env.LIQUID_API_URL || "https://api.liquid.com";
@@ -77,8 +78,7 @@ function buildHeaders(method: string, path: string, body = ""): HeadersInit {
   const nonce = Date.now().toString();
   const message = nonce + method.toUpperCase() + path + body;
 
-  // HMAC-SHA256 signature — using Node crypto
-  const { createHmac } = require("crypto") as typeof import("crypto");
+  // HMAC-SHA256 signature
   const signature = createHmac("sha256", apiSecret)
     .update(message)
     .digest("hex");
