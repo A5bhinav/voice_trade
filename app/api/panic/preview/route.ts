@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLiquidClient } from "@/lib/liquid";
+import { LiquidClient } from "@/lib/liquid";
 import { storePendingCommand } from "@/lib/session";
 import { PanicPreview } from "@/lib/types";
 
@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { armed } = body as { armed: boolean };
 
-    const liquid = getLiquidClient();
+    const liquid = LiquidClient;
 
     const [openOrders, positions] = await Promise.all([
       liquid.getOpenOrders(),
