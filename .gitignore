@@ -1,2 +1,26 @@
 node_modules
 .env.local
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# audit log (contains trade data)
+audit.jsonl
+
+# build
+dist/
+
+# OS
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
