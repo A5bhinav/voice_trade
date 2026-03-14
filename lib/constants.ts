@@ -1,0 +1,9 @@
+export const MAX_ORDER_USD = Number(process.env.MAX_ORDER_USD) || 500;
+export const MAX_LEVERAGE = 10;
+export const MIN_ORDER_USD = 10;
+export const DAILY_LOSS_LIMIT_USD = Number(process.env.DAILY_LOSS_LIMIT_USD) || 200;
+export const SUPPORTED_SYMBOLS = ["BTC-PERP", "ETH-PERP", "SOL-PERP"];
+export const PANIC_KEYWORDS = ["panic", "close all", "flatten", "emergency"];
+export const CONFIRMATION_TOKEN_TTL_MS = 60_000;
+export const MUTATION_DELAY_MS = 300;
+export const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || "./audit.jsonl";
