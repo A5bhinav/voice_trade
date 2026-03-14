@@ -34,57 +34,97 @@ export default function RebalancePlan({ plan, confirmationToken, onExecuted, onC
   }
 
   return (
-    <div className="rounded-lg border border-zinc-600 bg-zinc-900 p-4 text-sm">
-      <div className="mb-3">
-        <span className="text-xs uppercase font-semibold text-zinc-400">Rebalance Plan</span>
-        <p className="text-white mt-1">{plan.intent_summary}</p>
+    <div className="rounded-2xl p-5 mt-2 mb-2 max-w-sm" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
+      <div className="mb-4 pb-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
+        <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: "var(--accent-green)" }}>
+          AI Agent Proposal
+        </span>
+        <p className="text-[14px] font-bold mt-2 leading-tight" style={{ color: "var(--foreground)" }}>
+          {plan.intent_summary}
+        </p>
       </div>
 
       {plan.preconditions.length > 0 && (
-        <div className="mb-3">
-          <span className="text-xs text-zinc-500 uppercase">Checks</span>
+        <div className="mb-4 space-y-2 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}>
+          <span className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: "var(--text-secondary)" }}>
+            Checks
+          </span>
           {plan.preconditions.map((p, i) => (
-            <div key={i} className="text-zinc-300 text-xs ml-2">✓ {p}</div>
+            <div key={i} className="text-[12px] font-semibold flex items-center gap-2" style={{ color: "var(--foreground)" }}>
+              <span style={{ color: "var(--accent-green)" }}>✓</span> {p}
+            </div>
           ))}
         </div>
       )}
 
-      <div className="mb-3 space-y-2">
-        <span className="text-xs text-zinc-500 uppercase">Actions ({plan.actions.length})</span>
-        {plan.actions.map((action, i) => (
-          <div key={i} className="flex items-center justify-between bg-zinc-800 rounded px-3 py-2">
-            <div className="flex items-center gap-2">
-              <span className={`text-xs font-semibold uppercase ${action.side === "buy" ? "text-green-400" : "text-red-400"}`}>
-                {action.side}
-              </span>
-              <span className="text-zinc-200">{action.symbol}</span>
-              {action.note && <span className="text-zinc-500 text-xs">{action.note}</span>}
+      <div className="mb-5 space-y-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: "var(--text-secondary)" }}>
+          Proposed Moves ({plan.actions.length})
+        </span>
+        <div className="space-y-1.5">
+          {plan.actions.map((action, i) => (
+            <div
+              key={i}
+              className="flex flex-col rounded-xl px-3 py-2.5"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{
+                      background: action.side === "buy" ? "var(--accent-green)" : "#ff4444",
+                      boxShadow: action.side === "buy" ? "0 0 6px rgba(61,255,124,0.6)" : "0 0 6px rgba(255,68,68,0.6)",
+                    }}
+                  />
+                  <span className="font-semibold text-[13px]" style={{ color: "var(--foreground)" }}>
+                    {action.side === "buy" ? "Buy" : "Sell"} {action.symbol}
+                  </span>
+                </div>
+                <span className="font-black text-[13px]" style={{ color: "var(--foreground)" }}>${action.size_usd}</span>
+              </div>
+              {action.note && (
+                <span className="text-[11px] font-semibold mt-1.5 pt-1.5" style={{ color: "var(--text-secondary)", borderTop: "1px solid var(--card-border)" }}>
+                  {action.note}
+                </span>
+              )}
             </div>
-            <span className="text-zinc-200 font-medium">${action.size_usd}</span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <div className="text-xs text-zinc-500 mb-3">
-        Est. mutations: {plan.estimated_total_mutations}
-      </div>
-
-      {error && <div className="text-red-400 text-xs mb-2">{error}</div>}
-
-      <div className="flex gap-2">
-        <button
-          onClick={handleApprove}
-          disabled={loading}
-          className="flex-1 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500 disabled:opacity-50 transition-colors"
+      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider mb-4 pl-1" style={{ color: "var(--text-secondary)" }}>
+        <span>API Mutations</span>
+        <span
+          className="px-2 py-0.5 rounded-full"
+          style={{ background: "rgba(61,255,124,0.1)", color: "var(--accent-green)", border: "1px solid rgba(61,255,124,0.2)" }}
         >
-          {loading ? "Executing…" : "Approve Plan"}
-        </button>
+          {plan.estimated_total_mutations}
+        </span>
+      </div>
+
+      {error && (
+        <div className="text-[12px] font-bold mb-4 p-2 rounded-lg text-center" style={{ color: "#ff6b6b", background: "rgba(255,68,68,0.08)", border: "1px solid rgba(255,68,68,0.2)" }}>
+          {error}
+        </div>
+      )}
+
+      <div className="flex gap-3">
         <button
           onClick={onCancel}
           disabled={loading}
-          className="flex-1 py-2 rounded bg-zinc-700 text-zinc-200 hover:bg-zinc-600 disabled:opacity-50 transition-colors"
+          className="flex-1 py-3 rounded-full text-[13px] font-black uppercase tracking-widest transition-colors disabled:opacity-50"
+          style={{ background: "rgba(255,255,255,0.06)", color: "var(--foreground)", border: "1px solid var(--card-border)" }}
         >
           Cancel
+        </button>
+        <button
+          onClick={handleApprove}
+          disabled={loading}
+          className="flex-1 py-3.5 rounded-full text-[13px] font-black uppercase tracking-widest transition-colors disabled:opacity-50 shadow-sm"
+          style={{ background: "var(--accent-green)", color: "#060e09" }}
+        >
+          {loading ? "Executing…" : "Confirm"}
         </button>
       </div>
     </div>

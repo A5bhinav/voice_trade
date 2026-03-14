@@ -80,39 +80,68 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
 
   if (!supported) {
     return (
-      <div className="text-xs text-zinc-500 text-center py-2">
+      <div className="text-xs text-center py-2" style={{ color: "var(--text-secondary)" }}>
         Voice not supported in this browser. Use Chrome for push-to-talk.
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {transcript && (
-        <div className="flex items-center gap-2 rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-200">
-          <span className="flex-1">{transcript}</span>
-          <button
-            onClick={handleSubmitTranscript}
-            className="text-blue-400 hover:text-blue-300 text-xs font-medium"
-          >
-            Send
-          </button>
-        </div>
-      )}
+    <div className="flex flex-col items-center gap-4 py-4">
+      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>
+        Voice Command
+      </span>
+
       <button
         onMouseDown={startListening}
         onMouseUp={stopListening}
         onTouchStart={startListening}
         onTouchEnd={stopListening}
         disabled={disabled}
-        className={`w-full py-3 rounded-lg font-semibold text-sm transition-colors select-none ${
-          listening
-            ? "bg-red-600 text-white animate-pulse"
-            : "bg-zinc-700 text-zinc-200 hover:bg-zinc-600"
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`w-24 h-24 rounded-full flex items-center justify-center transition-all select-none disabled:opacity-40 disabled:cursor-not-allowed ${
+          listening ? "mic-glow" : "glow-green"
+        }`}
+        style={{
+          background: listening
+            ? "radial-gradient(circle, #ffffff 0%, #e8ffe0 60%, #b8f5c8 100%)"
+            : "radial-gradient(circle, #e8ffe0 0%, #a0e8b8 60%, #4afa7a 100%)",
+          border: listening ? "none" : "2px solid rgba(61,255,124,0.4)",
+        }}
+        aria-label={listening ? "Listening" : "Hold to talk"}
       >
-        {listening ? "🎙 Listening… (release to stop)" : "Hold to Talk"}
+        <svg
+          width="36"
+          height="36"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={listening ? "#060e09" : "#060e09"}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <line x1="12" y1="19" x2="12" y2="23" />
+          <line x1="8" y1="23" x2="16" y2="23" />
+        </svg>
       </button>
+
+      <span className="text-[13px] font-medium" style={{ color: listening ? "var(--accent-green)" : "var(--text-secondary)" }}>
+        {listening ? "I'm listening..." : "Hold to talk"}
+      </span>
+
+      {transcript && (
+        <div className="flex items-center gap-2 w-full rounded-full px-4 py-2 text-[13px]" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)", color: "var(--foreground)" }}>
+          <span className="flex-1 truncate">{transcript}</span>
+          <button
+            onClick={handleSubmitTranscript}
+            className="font-bold uppercase tracking-wider text-[10px]"
+            style={{ color: "var(--accent-green)" }}
+          >
+            Send
+          </button>
+        </div>
+      )}
     </div>
   );
 }

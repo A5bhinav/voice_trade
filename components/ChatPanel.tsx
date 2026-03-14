@@ -86,7 +86,6 @@ export default function ChatPanel() {
       }
 
       if (isTradePlan(parsed)) {
-        // Rebalance: get plan preview
         updateLastMessage({ content: "Generating rebalance plan…" });
         const prevRes = await fetch("/api/rebalance/preview", {
           method: "POST",
@@ -106,7 +105,6 @@ export default function ChatPanel() {
         return;
       }
 
-      // Single trade command — get preview
       updateLastMessage({ content: "Validating…" });
       const prevRes = await fetch("/api/command/preview", {
         method: "POST",
@@ -154,20 +152,36 @@ export default function ChatPanel() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ background: "var(--background)" }}>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map((msg) => (
           <div key={msg.id} className={msg.role === "user" ? "flex justify-end" : "flex justify-start"}>
             <div className={`max-w-[85%] space-y-2 ${msg.role === "user" ? "items-end" : "items-start"} flex flex-col`}>
               {msg.role === "system" ? (
-                <div className="text-xs text-zinc-500 text-center w-full">{msg.content}</div>
+                <div
+                  className="text-[10px] font-medium text-center w-full uppercase tracking-wider my-4"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {msg.content}
+                </div>
               ) : (
                 <div
-                  className={`rounded-2xl px-4 py-2 text-sm ${
+                  className="rounded-2xl px-5 py-3 text-[15px] leading-relaxed max-w-[90%]"
+                  style={
                     msg.role === "user"
-                      ? "bg-blue-600 text-white rounded-br-sm"
-                      : "bg-zinc-800 text-zinc-200 rounded-bl-sm"
-                  }`}
+                      ? {
+                          background: "rgba(61,255,124,0.12)",
+                          color: "var(--foreground)",
+                          border: "1px solid rgba(61,255,124,0.25)",
+                          borderBottomRightRadius: "4px",
+                        }
+                      : {
+                          background: "var(--card-bg)",
+                          color: "var(--foreground)",
+                          border: "1px solid var(--card-border)",
+                          borderBottomLeftRadius: "4px",
+                        }
+                  }
                 >
                   {msg.content}
                 </div>
@@ -213,7 +227,7 @@ export default function ChatPanel() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t border-zinc-800 px-4 py-3 space-y-2">
+      <div className="px-6 py-4 space-y-3" style={{ borderTop: "1px solid var(--card-border)", background: "var(--card-bg)" }}>
         <VoiceInput
           onTranscript={(text) => {
             setInput(text);
@@ -234,12 +248,18 @@ export default function ChatPanel() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type a trade command…"
             disabled={loading}
-            className="flex-1 rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            className="flex-1 rounded-full px-6 py-3 text-[15px] focus:outline-none disabled:opacity-50 transition-all"
+            style={{
+              background: "var(--background)",
+              color: "var(--foreground)",
+              border: "1px solid var(--card-border)",
+            }}
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 rounded-full text-[15px] font-bold transition-colors disabled:opacity-30"
+            style={{ background: "var(--accent-green)", color: "#060e09" }}
           >
             Send
           </button>
