@@ -140,8 +140,8 @@ export default function PanicButton({ armed, onArmToggle, onPanicComplete }: Pan
       )}
 
       {result && (
-        <div className="rounded-xl p-4 space-y-2" style={{ background: "rgba(61,255,124,0.05)", border: "1px solid rgba(61,255,124,0.2)" }}>
-          <div className="font-black tracking-tight text-[15px]" style={{ color: "var(--accent-green)" }}>Panic Complete</div>
+        <div className="rounded-xl p-4 space-y-2" style={{ background: "rgba(74,144,217,0.05)", border: "1px solid rgba(74,144,217,0.2)" }}>
+          <div className="font-black tracking-tight text-[15px]" style={{ color: "var(--accent)" }}>Panic Complete</div>
           <div className="text-[13px] font-medium" style={{ color: "var(--foreground)" }}>
             Orders cancelled: <span className="font-bold">{result.orders_cancelled}</span>
           </div>
@@ -156,7 +156,7 @@ export default function PanicButton({ armed, onArmToggle, onPanicComplete }: Pan
           <button
             onClick={handleCancel}
             className="text-[12px] font-bold uppercase tracking-widest mt-3"
-            style={{ color: "var(--accent-green)" }}
+            style={{ color: "var(--accent)" }}
           >
             Dismiss
           </button>

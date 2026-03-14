@@ -22,7 +22,7 @@ export default function PortfolioPanel({ portfolio, loading }: PortfolioPanelPro
 
   return (
     <div className="rounded-2xl p-5 space-y-5" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-      <h3 className="text-[11px] font-black uppercase tracking-widest" style={{ color: "var(--accent-green)" }}>
+      <h3 className="text-[11px] font-black uppercase tracking-widest" style={{ color: "var(--accent)" }}>
         Portfolio Tracker
       </h3>
 
@@ -62,7 +62,7 @@ export default function PortfolioPanel({ portfolio, loading }: PortfolioPanelPro
                     className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
                     style={
                       p.side === "long"
-                        ? { background: "rgba(61,255,124,0.15)", color: "var(--accent-green)", border: "1px solid rgba(61,255,124,0.3)" }
+                        ? { background: "rgba(74,144,217,0.15)", color: "var(--accent)", border: "1px solid rgba(74,144,217,0.3)" }
                         : { background: "rgba(255,68,68,0.15)", color: "#ff6b6b", border: "1px solid rgba(255,68,68,0.3)" }
                     }
                   >
@@ -72,7 +72,7 @@ export default function PortfolioPanel({ portfolio, loading }: PortfolioPanelPro
                 </div>
                 <div className="text-right">
                   <div className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{p.size}</div>
-                  <div className="text-[12px] font-semibold" style={{ color: p.unrealized_pnl >= 0 ? "var(--accent-green)" : "#ff6b6b" }}>
+                  <div className="text-[12px] font-semibold" style={{ color: p.unrealized_pnl >= 0 ? "var(--accent)" : "#ff6b6b" }}>
                     {p.unrealized_pnl >= 0 ? "+" : ""}{p.unrealized_pnl.toFixed(2)}
                   </div>
                 </div>
@@ -99,7 +99,7 @@ export default function PortfolioPanel({ portfolio, loading }: PortfolioPanelPro
                     className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
                     style={
                       o.side === "buy"
-                        ? { background: "rgba(61,255,124,0.15)", color: "var(--accent-green)", border: "1px solid rgba(61,255,124,0.3)" }
+                        ? { background: "rgba(74,144,217,0.15)", color: "var(--accent)", border: "1px solid rgba(74,144,217,0.3)" }
                         : { background: "rgba(255,68,68,0.15)", color: "#ff6b6b", border: "1px solid rgba(255,68,68,0.3)" }
                     }
                   >
