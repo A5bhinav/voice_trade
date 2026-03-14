@@ -92,13 +92,13 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
         onTouchEnd={stopListening}
         disabled={disabled}
         className={`w-24 h-24 rounded-full flex items-center justify-center transition-all select-none disabled:opacity-40 disabled:cursor-not-allowed ${
-          listening ? "mic-glow" : "glow-green"
+          listening ? "mic-glow" : "glow-blue"
         }`}
         style={{
           background: listening
-            ? "radial-gradient(circle, #ffffff 0%, #e8ffe0 60%, #b8f5c8 100%)"
-            : "radial-gradient(circle, #e8ffe0 0%, #a0e8b8 60%, #4afa7a 100%)",
-          border: listening ? "none" : "2px solid rgba(61,255,124,0.4)",
+            ? "radial-gradient(circle, #ffffff 0%, #d0e8ff 60%, #a0c8f0 100%)"
+            : "radial-gradient(circle, #e8f0ff 0%, #a0c4f0 60%, #4a90d9 100%)",
+          border: listening ? "none" : "2px solid rgba(74,144,217,0.4)",
         }}
         aria-label={listening ? "Listening" : "Hold to talk"}
       >
@@ -107,7 +107,7 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
           height="36"
           viewBox="0 0 24 24"
           fill="none"
-          stroke={listening ? "#060e09" : "#060e09"}
+          stroke={listening ? "#05080f" : "#05080f"}
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -119,7 +119,7 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
         </svg>
       </button>
 
-      <span className="text-[13px] font-medium" style={{ color: listening ? "var(--accent-green)" : "var(--text-secondary)" }}>
+      <span className="text-[13px] font-medium" style={{ color: listening ? "var(--accent)" : "var(--text-secondary)" }}>
         {listening ? "I'm listening..." : "Hold to talk"}
       </span>
 
@@ -129,7 +129,7 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
           <button
             onClick={handleSubmitTranscript}
             className="font-bold uppercase tracking-wider text-[10px]"
-            style={{ color: "var(--accent-green)" }}
+            style={{ color: "var(--accent)" }}
           >
             Send
           </button>

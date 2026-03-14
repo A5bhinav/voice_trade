@@ -42,7 +42,7 @@ export default function PreviewCard({ preview, onCancel, onExecuted }: PreviewCa
       <div className="flex items-center gap-3 mb-4 pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
         <span
           className="px-2 py-0.5 text-[10px] rounded-full uppercase font-bold tracking-wider"
-          style={{ background: "rgba(61,255,124,0.15)", color: "var(--accent-green)", border: "1px solid rgba(61,255,124,0.3)" }}
+          style={{ background: "rgba(74,144,217,0.15)", color: "var(--accent)", border: "1px solid rgba(74,144,217,0.3)" }}
         >
           {preview.type}
         </span>
@@ -96,7 +96,7 @@ export default function PreviewCard({ preview, onCancel, onExecuted }: PreviewCa
           onClick={handleConfirm}
           disabled={loading}
           className="flex-1 py-3 rounded-full text-[13px] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "var(--accent-green)", color: "#060e09" }}
+          style={{ background: "var(--accent)", color: "#05080f" }}
         >
           {loading ? "Executing…" : "Confirm"}
         </button>

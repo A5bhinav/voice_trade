@@ -36,8 +36,8 @@ export default function Home() {
   }, [fetchPortfolio]);
 
   return (
-    <div className="flex flex-col h-screen font-sans items-center" style={{ background: "var(--background)", color: "var(--foreground)" }}>
-      <div className="w-full max-w-4xl flex flex-col h-full overflow-hidden relative" style={{ background: "var(--background)" }}>
+    <div className="flex flex-col h-screen w-screen font-sans" style={{ background: "var(--background)", color: "var(--foreground)" }}>
+      <div className="flex flex-col h-full w-full overflow-hidden" style={{ background: "var(--background)" }}>
         <Header lastSyncAt={lastSyncAt} />
 
         <div className="flex flex-1 overflow-hidden">

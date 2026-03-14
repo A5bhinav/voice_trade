@@ -5,7 +5,7 @@ import { MAX_ORDER_USD, MAX_LEVERAGE, DAILY_LOSS_LIMIT_USD } from "@/lib/constan
 export default function RiskControls() {
   return (
     <div className="rounded-2xl p-5" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-      <h3 className="text-[11px] font-black uppercase tracking-widest mb-5" style={{ color: "var(--accent-green)" }}>
+      <h3 className="text-[11px] font-black uppercase tracking-widest mb-5" style={{ color: "var(--accent)" }}>
         Risk Profile
       </h3>
       <div className="space-y-3">
