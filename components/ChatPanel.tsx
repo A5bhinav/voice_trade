@@ -14,7 +14,6 @@ import RebalancePlan from "./RebalancePlan";
 import TradeReceipt from "./TradeReceipt";
 import ProposalSetView from "./ProposalSetView";
 import VoiceMic from "./VoiceInput";
-import ProposalSetView from "./ProposalSetView";
 
 interface Message {
   id: string;
