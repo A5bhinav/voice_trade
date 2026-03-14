@@ -9,7 +9,7 @@ interface TradeReceiptProps {
 export default function TradeReceipt({ receipt }: TradeReceiptProps) {
   const statusStyle =
     receipt.status === "executed"
-      ? { color: "var(--accent-green)" }
+      ? { color: "var(--accent)" }
       : receipt.status === "partial"
       ? { color: "#ffb347" }
       : { color: "#ff6b6b" };

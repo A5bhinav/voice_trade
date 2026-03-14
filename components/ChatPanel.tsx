@@ -259,7 +259,7 @@ export default function ChatPanel() {
             type="submit"
             disabled={loading || !input.trim()}
             className="px-6 py-3 rounded-full text-[15px] font-bold transition-colors disabled:opacity-30"
-            style={{ background: "var(--accent-green)", color: "#060e09" }}
+            style={{ background: "var(--accent)", color: "#05080f" }}
           >
             Send
           </button>

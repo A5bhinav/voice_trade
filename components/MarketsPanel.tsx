@@ -41,7 +41,7 @@ export default function MarketsPanel() {
 
   return (
     <div className="rounded-2xl p-5 space-y-4" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-      <h3 className="text-[11px] font-black uppercase tracking-widest" style={{ color: "var(--accent-green)" }}>
+      <h3 className="text-[11px] font-black uppercase tracking-widest" style={{ color: "var(--accent)" }}>
         Live Markets
       </h3>
       <div className="flex justify-between items-center gap-2">

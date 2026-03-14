@@ -36,7 +36,7 @@ export default function RebalancePlan({ plan, confirmationToken, onExecuted, onC
   return (
     <div className="rounded-2xl p-5 mt-2 mb-2 max-w-sm" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
       <div className="mb-4 pb-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
-        <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: "var(--accent-green)" }}>
+        <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: "var(--accent)" }}>
           AI Agent Proposal
         </span>
         <p className="text-[14px] font-bold mt-2 leading-tight" style={{ color: "var(--foreground)" }}>
@@ -51,7 +51,7 @@ export default function RebalancePlan({ plan, confirmationToken, onExecuted, onC
           </span>
           {plan.preconditions.map((p, i) => (
             <div key={i} className="text-[12px] font-semibold flex items-center gap-2" style={{ color: "var(--foreground)" }}>
-              <span style={{ color: "var(--accent-green)" }}>✓</span> {p}
+              <span style={{ color: "var(--accent)" }}>✓</span> {p}
             </div>
           ))}
         </div>
@@ -73,8 +73,8 @@ export default function RebalancePlan({ plan, confirmationToken, onExecuted, onC
                   <div
                     className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                     style={{
-                      background: action.side === "buy" ? "var(--accent-green)" : "#ff4444",
-                      boxShadow: action.side === "buy" ? "0 0 6px rgba(61,255,124,0.6)" : "0 0 6px rgba(255,68,68,0.6)",
+                      background: action.side === "buy" ? "var(--accent)" : "#ff4444",
+                      boxShadow: action.side === "buy" ? "0 0 6px rgba(74,144,217,0.6)" : "0 0 6px rgba(255,68,68,0.6)",
                     }}
                   />
                   <span className="font-semibold text-[13px]" style={{ color: "var(--foreground)" }}>
@@ -97,7 +97,7 @@ export default function RebalancePlan({ plan, confirmationToken, onExecuted, onC
         <span>API Mutations</span>
         <span
           className="px-2 py-0.5 rounded-full"
-          style={{ background: "rgba(61,255,124,0.1)", color: "var(--accent-green)", border: "1px solid rgba(61,255,124,0.2)" }}
+          style={{ background: "rgba(74,144,217,0.1)", color: "var(--accent)", border: "1px solid rgba(74,144,217,0.2)" }}
         >
           {plan.estimated_total_mutations}
         </span>
@@ -122,7 +122,7 @@ export default function RebalancePlan({ plan, confirmationToken, onExecuted, onC
           onClick={handleApprove}
           disabled={loading}
           className="flex-1 py-3.5 rounded-full text-[13px] font-black uppercase tracking-widest transition-colors disabled:opacity-50 shadow-sm"
-          style={{ background: "var(--accent-green)", color: "#060e09" }}
+          style={{ background: "var(--accent)", color: "#05080f" }}
         >
           {loading ? "Executing…" : "Confirm"}
         </button>
