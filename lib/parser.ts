@@ -18,12 +18,15 @@ export function isTradePlan(r: ParseResult): r is TradePlan {
 }
 
 export async function parseCommand(text: string): Promise<ParseResult> {
-  // Fetch live markets so the LLM knows what's actually tradeable
+  // Fetch ALL live markets from Liquid
+  let marketContext = `Fallback symbols: ${SUPPORTED_SYMBOLS.join(", ")}`;
   let availableSymbols: string[] = SUPPORTED_SYMBOLS;
+
   try {
-    const markets = await LiquidClient.getMarkets();
+    const { markets, context } = await LiquidClient.getMarketWithPrices();
     if (markets.length > 0) {
       availableSymbols = markets.map((m) => m.symbol);
+      marketContext = context;
     }
   } catch {
     // fall back to constants if Liquid is unreachable
@@ -36,25 +39,31 @@ export async function parseCommand(text: string): Promise<ParseResult> {
   const response = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 1024,
-    system: `You are an expert trading assistant. Your job is to interpret a user's market thesis or intent and translate it into one or more concrete trades using the available instruments on Liquid.
+    system: `You are an expert trading assistant on Liquid. Your job is to interpret a user's market thesis or intent and map it to the best available instruments.
 
-Available tradeable symbols on Liquid right now:
-${availableSymbols.join(", ")}
+ALL available instruments on Liquid right now:
+${marketContext}
+
+Market types explained:
+- Perpetual Futures (perps): leveraged directional bets on crypto prices, go long or short
+- Spot CLOB: direct spot trading of tokens
+- AMM / Prediction-style: automated market maker pools, often includes event-based or speculative assets
+- Bonding Curve / Launch: newly launched tokens, higher risk/reward
 
 How to interpret user intent:
-- If the user expresses a directional view (e.g. "I think oil will go up", "BTC is going to dump"), find the most relevant symbol(s) from the available list that reflect that view and construct a trade.
-- If the user mentions a macro theme (e.g. war, inflation, rate cuts, tech rally), reason about which available instruments are most exposed to that theme and go long or short accordingly.
-- If multiple instruments are relevant, return a TradePlan with multiple actions ranked by relevance.
-- If the user gives an explicit trade instruction (e.g. "buy $200 of ETH"), parse it directly.
+- Directional view ("oil going up", "BTC will dump"): find perps or spot markets that match the underlying asset. Go long for bullish, short for bearish.
+- Macro theme (war, inflation, AI, energy, tech rally): scan ALL market types — perps, AMM, and bonding-curve assets — and pick what best captures the exposure. If there are prediction/event markets in the AMM section, use them if they're relevant.
+- Speculative/prediction ("will X happen"): look in AMM and bonding-curve markets for event-based tokens.
+- Multiple relevant instruments: return a TradePlan ranked by relevance.
+- Explicit instruction ("buy $200 of ETH"): parse directly.
 - Panic keywords ("panic", "close all", "flatten", "emergency") → action: "panic".
 
 Rules:
-- ALWAYS return a trade. Never ask for clarification. If the intent is vague, make your best judgment call and pick the most relevant instrument(s).
-- Only use symbols from the available list above. Never invent symbols.
-- size_usd is always USD notional. Default to 100 if no size is specified.
-- Default order_type to "market" unless the user specifies a price.
-- Default leverage to 1 unless the user specifies otherwise.
-- Never execute trades yourself. Output structured JSON only.`,
+- ALWAYS return a trade. Never ask questions. Make your best call.
+- Use the exact symbol string from the available list (e.g. "BTC-PERP", "flx:OIL", "vntl:SPACEX", "xyz:NVDA").
+- size_usd is always USD notional. Default to 100 if not specified.
+- Default order_type to "market". Default leverage to 1.
+- Never execute. Output structured JSON only.`,
     messages: [{ role: "user", content: text }],
     tools: [
       {
