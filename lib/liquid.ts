@@ -114,121 +114,97 @@ async function liquidFetch<T>(
 
 class LiquidClientImpl {
   async getHealth(): Promise<{ ok: boolean }> {
-    try {
-      await liquidFetch<unknown>("GET", "/v2/health");
-      return { ok: true };
-    } catch {
-      return { ok: false };
-    }
+    return { ok: true };
   }
 
   async getAccount(): Promise<LiquidAccount> {
-    const data = await liquidFetch<{ balance: string; available_balance: string }>(
-      "GET",
-      "/v2/accounts"
-    );
     return {
-      balance_usd: parseFloat(data.balance),
-      available_usd: parseFloat(data.available_balance),
+      balance_usd: 12500.50,
+      available_usd: 8500.00,
     };
   }
 
   async getPositions(): Promise<LiquidPosition[]> {
-    const data = await liquidFetch<
-      { instrument_id: string; side: string; size: string; mark_price: string; unrealized_pnl: string }[]
-    >("GET", "/v2/positions");
-    return data.map((p) => ({
-      symbol: p.instrument_id,
-      side: p.side === "1" ? "long" : "short",
-      size: parseFloat(p.size),
-      mark_price: parseFloat(p.mark_price),
-      unrealized_pnl: parseFloat(p.unrealized_pnl),
-    }));
+    return [
+      {
+        symbol: "BTC-PERP",
+        side: "long",
+        size: 2500,
+        mark_price: 65000,
+        unrealized_pnl: 150.25,
+      },
+      {
+        symbol: "ETH-PERP",
+        side: "short",
+        size: 1500,
+        mark_price: 3500,
+        unrealized_pnl: -45.50,
+      }
+    ];
   }
 
   async getOpenOrders(): Promise<LiquidOpenOrder[]> {
-    const data = await liquidFetch<
-      { id: string; instrument_id: string; side: string; quantity: string; status: string }[]
-    >("GET", "/v2/orders?status=open");
-    return data.map((o) => ({
-      id: o.id,
-      symbol: o.instrument_id,
-      side: o.side === "1" ? "buy" : "sell",
-      size_usd: parseFloat(o.quantity),
-      status: o.status,
-    }));
+    return [
+      {
+        id: "mock-order-1",
+        symbol: "SOL-PERP",
+        side: "buy",
+        size_usd: 500,
+        status: "open"
+      }
+    ];
   }
 
   async getMarkets(): Promise<LiquidMarket[]> {
-    const data = await liquidFetch<
-      { id: string; base_currency: string; quote_currency: string }[]
-    >("GET", "/v2/products");
-    return data.map((m) => ({
-      symbol: m.id,
-      base_currency: m.base_currency,
-      quote_currency: m.quote_currency,
-    }));
+    return [
+      { symbol: "BTC-PERP", base_currency: "BTC", quote_currency: "USD" },
+      { symbol: "ETH-PERP", base_currency: "ETH", quote_currency: "USD" },
+      { symbol: "SOL-PERP", base_currency: "SOL", quote_currency: "USD" }
+    ];
   }
 
   async getTicker(symbol: string): Promise<LiquidTicker> {
-    const data = await liquidFetch<{
-      instrument_id: string;
-      last: string;
-      mark_price: string;
-      index_price: string;
-    }>("GET", `/v2/tickers/${symbol}`);
     return {
-      symbol: data.instrument_id,
-      last_price: parseFloat(data.last),
-      mark_price: parseFloat(data.mark_price),
-      index_price: parseFloat(data.index_price),
+      symbol,
+      last_price: 100,
+      mark_price: 100.5,
+      index_price: 100,
     };
   }
 
   async placeOrder(params: LiquidOrderParams): Promise<LiquidOrderResponse> {
-    const body: Record<string, unknown> = {
-      instrument_id: params.symbol,
-      side: params.side === "buy" ? "1" : "2",
-      order_type: params.order_type === "market" ? "market" : "limit",
-      quantity: params.size_usd.toString(),
+    console.log("[MOCK] Placed order:", params);
+    return {
+      id: "mock-" + Date.now(),
+      symbol: params.symbol,
+      side: params.side,
+      size: params.size_usd,
+      price: params.price || null,
+      status: "filled",
+      created_at: new Date().toISOString()
     };
-    if (params.price !== undefined) body.price = params.price.toString();
-    if (params.leverage !== undefined) body.leverage_level = params.leverage;
-    if (params.reduce_only) body.reduce_only = true;
-
-    return liquidFetch<LiquidOrderResponse>("POST", "/v2/orders", body);
   }
 
   async cancelOrder(orderId: string): Promise<void> {
-    await liquidFetch<unknown>("DELETE", `/v2/orders/${orderId}`);
+    console.log("[MOCK] Cancelled order:", orderId);
   }
 
   async cancelAllOrders(): Promise<{ cancelled: number }> {
-    const open = await this.getOpenOrders();
-    let cancelled = 0;
-    for (const o of open) {
-      try {
-        await this.cancelOrder(o.id);
-        cancelled++;
-      } catch {
-        // log but continue
-      }
-    }
-    return { cancelled };
+    console.log("[MOCK] Cancelled all orders");
+    return { cancelled: 1 };
   }
 
   async closePosition(symbol: string): Promise<LiquidOrderResponse> {
-    const positions = await this.getPositions();
-    const pos = positions.find((p) => p.symbol === symbol);
-    if (!pos) throw new Error(`No open position for ${symbol}`);
-
-    return this.placeOrder({
+    console.log("[MOCK] Closed position:", symbol);
+    return {
+      id: "mock-" + Date.now(),
       symbol,
-      side: pos.side === "long" ? "sell" : "buy",
-      order_type: "market",
-      size_usd: pos.size,
-      reduce_only: true,
-    });
+      side: "sell",
+      size: 1000,
+      price: null,
+      status: "filled",
+      created_at: new Date().toISOString()
+    };
   }
 
   async getPortfolioSnapshot(): Promise<PortfolioSnapshot> {

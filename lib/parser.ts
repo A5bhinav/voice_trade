@@ -26,7 +26,7 @@ const anthropic = new Anthropic({
 
 export async function parseCommand(text: string): Promise<ParseResult> {
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-latest",
+    model: "claude-3-5-sonnet-20241022",
     max_tokens: 1024,
     system: `You are a trade command parser. Your only job is to convert a user's message into a valid JSON TradeCommand or TradePlan.
 Rules:

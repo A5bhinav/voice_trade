@@ -15,7 +15,7 @@ export async function generateRebalancePlan(
   userIntent: string
 ): Promise<TradePlan> {
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-latest",
+    model: "claude-3-5-sonnet-20241022",
     max_tokens: 1024,
     system: `You are a portfolio rebalance planner. Given current positions and a target allocation, generate a TradePlan JSON.
 Rules:

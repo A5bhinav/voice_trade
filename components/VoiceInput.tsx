@@ -17,29 +17,39 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
   const recognitionRef = useRef<AnyRecognition>(null);
 
   useEffect(() => {
-    const w = window as AnyRecognition;
+    if (typeof window === "undefined") return;
+
+    const w = window as any;
     const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    
     if (!SR) {
       setSupported(false);
       return;
     }
-    const recognition = new SR();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
+    
+    try {
+      const recognition = new SR();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
 
-    recognition.onresult = (event: AnyRecognition) => {
-      const result = Array.from(event.results as AnyRecognition[])
-        .map((r: AnyRecognition) => r[0].transcript as string)
-        .join(" ");
-      setTranscript(result);
-    };
+      recognition.onresult = (event: any) => {
+        const result = Array.from(event.results)
+          // @ts-ignore
+          .map((r: any) => r[0].transcript)
+          .join(" ");
+        setTranscript(result);
+      };
 
-    recognition.onend = () => {
-      setListening(false);
-    };
+      recognition.onend = () => {
+        setListening(false);
+      };
 
-    recognitionRef.current = recognition;
+      recognitionRef.current = recognition;
+    } catch (e) {
+      console.warn("Failed to initialize Speech Recognition", e);
+      setSupported(false);
+    }
   }, []);
 
   function startListening() {
