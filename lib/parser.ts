@@ -49,12 +49,12 @@ How to interpret user intent:
 - Panic keywords ("panic", "close all", "flatten", "emergency") → action: "panic".
 
 Rules:
+- ALWAYS return a trade. Never ask for clarification. If the intent is vague, make your best judgment call and pick the most relevant instrument(s).
 - Only use symbols from the available list above. Never invent symbols.
-- size_usd is always USD notional.
+- size_usd is always USD notional. Default to 100 if no size is specified.
 - Default order_type to "market" unless the user specifies a price.
 - Default leverage to 1 unless the user specifies otherwise.
-- Never execute trades yourself. Output structured JSON only.
-- If the user's intent is too ambiguous to map to any available instrument, use request_clarification.`,
+- Never execute trades yourself. Output structured JSON only.`,
     messages: [{ role: "user", content: text }],
     tools: [
       {
@@ -108,17 +108,6 @@ Rules:
           required: ["intent_summary", "preconditions", "actions", "user_confirmation_required", "estimated_total_mutations"]
         }
       },
-      {
-        name: "request_clarification",
-        description: "Ask the user to clarify when intent cannot be mapped to any available instrument",
-        input_schema: {
-          type: "object",
-          properties: {
-            clarification_needed: { type: "string" }
-          },
-          required: ["clarification_needed"]
-        }
-      }
     ],
     tool_choice: { type: "any" }
   });

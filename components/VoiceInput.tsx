@@ -15,34 +15,39 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
   const [transcript, setTranscript] = useState("");
   const [supported, setSupported] = useState(true);
   const recognitionRef = useRef<AnyRecognition>(null);
+  const isHoldingRef = useRef(false); // tracks whether button is physically held
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const w = window as any;
+    const w = window as AnyRecognition;
     const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-    
+
     if (!SR) {
       setSupported(false);
       return;
     }
-    
+
     try {
       const recognition = new SR();
-      recognition.continuous = false;
+      recognition.continuous = true;      // don't stop on silence
       recognition.interimResults = true;
       recognition.lang = "en-US";
 
-      recognition.onresult = (event: any) => {
-        const result = Array.from(event.results)
-          // @ts-ignore
-          .map((r: any) => r[0].transcript)
+      recognition.onresult = (event: AnyRecognition) => {
+        const result = Array.from(event.results as AnyRecognition[])
+          .map((r: AnyRecognition) => r[0].transcript as string)
           .join(" ");
         setTranscript(result);
       };
 
       recognition.onend = () => {
-        setListening(false);
+        // If the user is still holding the button, the API stopped on its own — restart it
+        if (isHoldingRef.current) {
+          try { recognition.start(); } catch { /* already starting */ }
+        } else {
+          setListening(false);
+        }
       };
 
       recognitionRef.current = recognition;
@@ -54,15 +59,17 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
 
   function startListening() {
     if (!recognitionRef.current || disabled) return;
+    isHoldingRef.current = true;
     setTranscript("");
     setListening(true);
-    recognitionRef.current.start();
+    try { recognitionRef.current.start(); } catch { /* already running */ }
   }
 
   function stopListening() {
     if (!recognitionRef.current) return;
-    recognitionRef.current.stop();
+    isHoldingRef.current = false;
     setListening(false);
+    recognitionRef.current.stop();
   }
 
   function handleSubmitTranscript() {

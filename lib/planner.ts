@@ -6,16 +6,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { TradePlan } from "./types";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "",
-});
-
 export async function generateRebalancePlan(
   currentState: unknown,
   userIntent: string
 ): Promise<TradePlan> {
+  const anthropic = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY || "",
+  });
+
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
+    model: "claude-haiku-4-5-20251001",
     max_tokens: 1024,
     system: `You are a portfolio rebalance planner. Given current positions and a target allocation, generate a TradePlan JSON.
 Rules:
