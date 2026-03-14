@@ -96,8 +96,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(preview);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Preview failed";
-    const status = message.includes("exceeds") || message.includes("Invalid") || message.includes("balance") ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    // Validation errors are client mistakes → 400. Anything else → 500.
+    const isValidationError =
+      message.includes("exceeds") ||
+      message.includes("below minimum") ||
+      message.includes("is required") ||
+      message.includes("Invalid") ||
+      message.includes("balance") ||
+      message.includes("Leverage") ||
+      message.includes("Unsupported");
+    return NextResponse.json({ error: message }, { status: isValidationError ? 400 : 500 });
   }
 }
 

@@ -127,6 +127,7 @@ async function call<T>(method: "GET" | "POST" | "DELETE" | "PATCH", path: string
     method,
     headers: buildHeaders(method, fullPath, bodyStr),
     body: bodyStr || undefined,
+    signal: AbortSignal.timeout(8000), // 8s hard timeout per request
   });
   const json = await res.json() as LiquidResponse<T>;
   if (!json.success) throw new Error(json.error?.message ?? `Liquid error on ${path}`);

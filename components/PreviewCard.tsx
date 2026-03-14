@@ -50,11 +50,14 @@ export default function PreviewCard({ preview, onCancel, onExecuted }: PreviewCa
         <span className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>{preview.summary}</span>
       </div>
 
-      {/* Details */}
-      <div className="px-4 py-3 space-y-1.5">
-        {Object.entries(preview.details).map(([k, v]) => (
-          <div key={k} className="flex items-center justify-between">
-            <span className="text-[10px] font-medium capitalize" style={{ color: "var(--text-3)" }}>
+      <div className="space-y-2 mb-4">
+        {Object.entries(preview.details ?? {}).map(([k, v]) => (
+          <div
+            key={k}
+            className="flex justify-between items-center px-3 py-2 rounded-xl"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}
+          >
+            <span className="capitalize text-[11px] font-bold tracking-wide" style={{ color: "var(--text-secondary)" }}>
               {k.replace(/_/g, " ")}
             </span>
             <span className="text-[12px] font-semibold font-mono" style={{ color: "var(--text)" }}>{v}</span>

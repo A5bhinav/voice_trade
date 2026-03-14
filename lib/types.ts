@@ -78,8 +78,18 @@ export interface PortfolioSnapshot {
   }[];
 }
 
+export interface TradeProposal {
+  rationale: string;     // Why this instrument captures the user's thesis
+  command: TradeCommand;
+}
+
+export interface ProposalSet {
+  user_intent: string;   // AI's one-sentence interpretation of the vague prompt
+  proposals: TradeProposal[]; // Ranked 1-3 options
+}
+
 export interface ClarificationResponse {
   clarification_needed: string;
 }
 
-export type ParseResponse = TradeCommand | TradePlan | ClarificationResponse;
+export type ParseResponse = TradeCommand | TradePlan | ProposalSet | ClarificationResponse;

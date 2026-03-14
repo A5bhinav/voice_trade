@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import type {
   ParseResponse,
   TradePlan,
+  ProposalSet,
+  TradeCommand,
   PreviewCard as PreviewCardType,
   ExecutionReceipt,
 } from "@/lib/types";
@@ -17,6 +19,7 @@ interface Message {
   role: "user" | "assistant" | "system";
   content: string;
   preview?: PreviewCardType;
+  proposals?: ProposalSet;
   plan?: TradePlan;
   planToken?: string;
   receipt?: ExecutionReceipt;
@@ -24,7 +27,11 @@ interface Message {
 }
 
 function isTradePlan(cmd: ParseResponse): cmd is TradePlan {
-  return "intent_summary" in cmd;
+  return "actions" in cmd && Array.isArray((cmd as TradePlan).actions);
+}
+
+function isProposalSet(cmd: ParseResponse): cmd is ProposalSet {
+  return "proposals" in cmd && Array.isArray((cmd as ProposalSet).proposals);
 }
 function isClarification(cmd: ParseResponse): cmd is { clarification_needed: string } {
   return "clarification_needed" in cmd;
@@ -37,6 +44,7 @@ export default function ChatPanel() {
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [proposalLoading, setProposalLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -66,7 +74,7 @@ export default function ChatPanel() {
     setLoading(true);
     setInput("");
     addMessage({ role: "user", content: text });
-    addMessage({ role: "assistant", content: "Parsing\u2026" });
+    addMessage({ role: "assistant", content: "Analyzing markets…" });
 
     try {
       const parseRes = await fetch("/api/command/parse", {
@@ -84,6 +92,17 @@ export default function ChatPanel() {
         updateLastMessage({ content: parsed.clarification_needed });
         return;
       }
+
+      // Vague intent → show ranked proposals
+      if (isProposalSet(parsed)) {
+        updateLastMessage({
+          content: parsed.user_intent,
+          proposals: parsed,
+        });
+        return;
+      }
+
+      // Multi-instrument rebalance plan
       if (isTradePlan(parsed)) {
         updateLastMessage({ content: "Generating rebalance plan\u2026" });
         const prevRes = await fetch("/api/rebalance/preview", {
@@ -97,15 +116,22 @@ export default function ChatPanel() {
         return;
       }
 
-      updateLastMessage({ content: "Validating\u2026" });
+      // Explicit single command
+      updateLastMessage({ content: "Validating…" });
       const prevRes = await fetch("/api/command/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsed),
       });
       const prevData = await prevRes.json();
-      if (!prevRes.ok) { updateLastMessage({ content: prevData.error || "Validation failed" }); return; }
-      updateLastMessage({ content: prevData.summary, preview: prevData });
+      if (!prevRes.ok) {
+        updateLastMessage({ content: prevData.error || "Validation failed" });
+        return;
+      }
+      updateLastMessage({
+        content: prevData.summary,
+        preview: prevData,
+      });
     } catch {
       updateLastMessage({ content: "Network error. Try again." });
     } finally {
@@ -113,9 +139,50 @@ export default function ChatPanel() {
     }
   }
 
+  // User picked a proposal → run preview, then show PreviewCard
+  async function handleProposalSelect(msgId: string, command: TradeCommand) {
+    setProposalLoading(true);
+    try {
+      const prevRes = await fetch("/api/command/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(command),
+      });
+      const prevData = await prevRes.json();
+      if (!prevRes.ok) {
+        // Clear proposals so user doesn't keep hitting the same broken command
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === msgId
+              ? { ...m, proposals: undefined, content: `${prevData.error ?? "Validation failed"} — try a new query.` }
+              : m
+          )
+        );
+        return;
+      }
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msgId
+            ? { ...m, proposals: undefined, content: prevData.summary ?? m.content, preview: prevData }
+            : m
+        )
+      );
+    } catch {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msgId ? { ...m, proposals: undefined, content: "Network error — try again." } : m
+        )
+      );
+    } finally {
+      setProposalLoading(false);
+    }
+  }
+
   function handleCancelPreview(msgId: string) {
     setMessages((prev) =>
-      prev.map((m) => m.id === msgId ? { ...m, preview: undefined, plan: undefined, planToken: undefined } : m)
+      prev.map((m) =>
+        m.id === msgId ? { ...m, preview: undefined, plan: undefined, planToken: undefined, proposals: undefined } : m
+      )
     );
   }
   function handleExecuted(msgId: string, receipt: ExecutionReceipt) {
@@ -160,9 +227,21 @@ export default function ChatPanel() {
                 </div>
               )}
 
+              {msg.proposals && (
+                <div className="w-full">
+                  <ProposalSetView
+                    proposalSet={msg.proposals}
+                    onSelect={(cmd) => handleProposalSelect(msg.id, cmd)}
+                    onCancel={() => handleCancelPreview(msg.id)}
+                    loading={proposalLoading}
+                  />
+                </div>
+              )}
+
               {msg.preview && (
                 <PreviewCard preview={msg.preview} onCancel={() => handleCancelPreview(msg.id)} onExecuted={(r) => handleExecuted(msg.id, r)} />
               )}
+
               {msg.plan && msg.planToken && (
                 <RebalancePlan plan={msg.plan} confirmationToken={msg.planToken} onExecuted={(rs) => handleRebalanceExecuted(msg.id, rs)} onCancel={() => handleCancelPreview(msg.id)} />
               )}

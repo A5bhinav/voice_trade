@@ -1,19 +1,16 @@
 /**
- * Server-side trade validator (A2)
+ * Server-side trade validator
  * All functions throw on violation — deterministic, no side effects.
  */
 
-import { SUPPORTED_SYMBOLS, MAX_LEVERAGE, MIN_ORDER_USD, MAX_ORDER_USD } from "./constants";
+import { MAX_LEVERAGE, MIN_ORDER_USD, MAX_ORDER_USD } from "./constants";
 import { consumePendingCommand } from "./session";
 import type { TradeCommand, TradePlan } from "./types";
 
 export function validateSymbol(symbol: string | undefined): void {
   if (!symbol) throw new Error("symbol is required");
-  if (!SUPPORTED_SYMBOLS.includes(symbol)) {
-    throw new Error(
-      `Unsupported symbol "${symbol}". Supported: ${SUPPORTED_SYMBOLS.join(", ")}`
-    );
-  }
+  // No hardcoded whitelist — the full market list is dynamic on Liquid.
+  // Invalid symbols will be rejected by the Liquid API with a 422/404.
 }
 
 export function validateLeverage(leverage: number | undefined): void {
