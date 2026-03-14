@@ -4,22 +4,22 @@ import { MAX_ORDER_USD, MAX_LEVERAGE, DAILY_LOSS_LIMIT_USD } from "@/lib/constan
 
 export default function RiskControls() {
   return (
-    <div className="rounded-[24px] border border-zinc-100 bg-white p-6 shadow-sm">
-      <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-5">
+    <div className="rounded-2xl p-5" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
+      <h3 className="text-[11px] font-black uppercase tracking-widest mb-5" style={{ color: "var(--accent-green)" }}>
         Risk Profile
       </h3>
-      <div className="space-y-4">
-        <div className="flex justify-between items-center border-b border-zinc-50 pb-3">
-          <span className="text-[13px] font-semibold text-zinc-400 uppercase tracking-wide">Max order size</span>
-          <span className="text-[15px] text-black font-black">${MAX_ORDER_USD}</span>
+      <div className="space-y-3">
+        <div className="flex justify-between items-center pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
+          <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-secondary)" }}>Max order size</span>
+          <span className="text-[14px] font-black" style={{ color: "var(--foreground)" }}>${MAX_ORDER_USD}</span>
         </div>
-        <div className="flex justify-between items-center border-b border-zinc-50 pb-3">
-          <span className="text-[13px] font-semibold text-zinc-400 uppercase tracking-wide">Max leverage</span>
-          <span className="text-[15px] text-black font-black">{MAX_LEVERAGE}x</span>
+        <div className="flex justify-between items-center pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
+          <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-secondary)" }}>Max leverage</span>
+          <span className="text-[14px] font-black" style={{ color: "var(--foreground)" }}>{MAX_LEVERAGE}x</span>
         </div>
-        <div className="flex justify-between items-center pb-1">
-          <span className="text-[13px] font-semibold text-zinc-400 uppercase tracking-wide">Daily loss cap</span>
-          <span className="text-[15px] text-black font-black">${DAILY_LOSS_LIMIT_USD}</span>
+        <div className="flex justify-between items-center">
+          <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-secondary)" }}>Daily loss cap</span>
+          <span className="text-[14px] font-black" style={{ color: "var(--foreground)" }}>${DAILY_LOSS_LIMIT_USD}</span>
         </div>
       </div>
     </div>

@@ -31,8 +31,8 @@ export default function MarketsPanel() {
 
   if (loading && tickers.length === 0) {
     return (
-      <div className="rounded-[24px] border border-zinc-100 bg-white p-6 shadow-sm">
-        <div className="text-zinc-400 text-sm font-medium">Loading markets…</div>
+      <div className="rounded-2xl p-5" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
+        <div className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Loading markets…</div>
       </div>
     );
   }
@@ -40,13 +40,21 @@ export default function MarketsPanel() {
   if (tickers.length === 0) return null;
 
   return (
-    <div className="rounded-[24px] border border-zinc-100 bg-white p-6 shadow-sm space-y-4">
-      <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Live Markets</h3>
+    <div className="rounded-2xl p-5 space-y-4" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
+      <h3 className="text-[11px] font-black uppercase tracking-widest" style={{ color: "var(--accent-green)" }}>
+        Live Markets
+      </h3>
       <div className="flex justify-between items-center gap-2">
         {tickers.map((t) => (
-          <div key={t.symbol} className="flex-1 text-center bg-zinc-50 rounded-2xl py-3 border border-zinc-100">
-            <div className="text-[11px] font-bold text-zinc-400 mb-1">{t.symbol.replace("-PERP", "")}</div>
-            <div className="text-[14px] font-black text-black">
+          <div
+            key={t.symbol}
+            className="flex-1 text-center rounded-xl py-3"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}
+          >
+            <div className="text-[11px] font-bold mb-1" style={{ color: "var(--text-secondary)" }}>
+              {t.symbol.replace("-PERP", "")}
+            </div>
+            <div className="text-[14px] font-black" style={{ color: "var(--foreground)" }}>
               {t.price !== null ? `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 1 })}` : "---"}
             </div>
           </div>

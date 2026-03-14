@@ -6,42 +6,59 @@ interface TradeReceiptProps {
   receipt: ExecutionReceipt;
 }
 
-const statusColors = {
-  executed: "text-emerald-500",
-  partial: "text-amber-500",
-  failed: "text-red-500",
-};
-
 export default function TradeReceipt({ receipt }: TradeReceiptProps) {
+  const statusStyle =
+    receipt.status === "executed"
+      ? { color: "var(--accent-green)" }
+      : receipt.status === "partial"
+      ? { color: "#ffb347" }
+      : { color: "#ff6b6b" };
+
   return (
-    <div className="rounded-[24px] border border-zinc-100 bg-white p-5 shadow-sm max-w-sm mt-2 mb-2">
-      <div className="flex items-center justify-between mb-4 border-b border-zinc-50 pb-3">
-        <span className="font-bold text-[14px] text-black capitalize">{receipt.type} Receipt</span>
-        <span className={`text-[11px] font-black uppercase tracking-wider ${statusColors[receipt.status]}`}>
+    <div className="rounded-2xl p-5 mt-2 mb-2 max-w-sm" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
+      <div className="flex items-center justify-between mb-4 pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
+        <span className="font-bold text-[14px] capitalize" style={{ color: "var(--foreground)" }}>
+          {receipt.type} Receipt
+        </span>
+        <span className="text-[11px] font-black uppercase tracking-wider" style={statusStyle}>
           {receipt.status}
         </span>
       </div>
       <div className="space-y-3">
         <div className="flex justify-between items-center">
-          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">ID</span>
-          <span className="font-mono text-[12px] font-semibold text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded">{receipt.id.slice(0, 12)}…</span>
+          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>ID</span>
+          <span className="font-mono text-[12px] font-semibold px-2 py-0.5 rounded" style={{ color: "var(--text-secondary)", background: "rgba(255,255,255,0.05)" }}>
+            {receipt.id.slice(0, 12)}…
+          </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Time</span>
-          <span className="text-[12px] font-semibold text-black">{new Date(receipt.timestamp).toLocaleTimeString()}</span>
+          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Time</span>
+          <span className="text-[12px] font-semibold" style={{ color: "var(--foreground)" }}>
+            {new Date(receipt.timestamp).toLocaleTimeString()}
+          </span>
         </div>
         {receipt.liquid_order_ids.length > 0 && (
-          <div className="pt-2 border-t border-zinc-50 border-dashed">
-            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Order IDs</span>
+          <div className="pt-2" style={{ borderTop: "1px dashed var(--card-border)" }}>
+            <span className="text-[11px] font-bold uppercase tracking-widest block mb-1" style={{ color: "var(--text-secondary)" }}>
+              Order IDs
+            </span>
             <div className="flex flex-wrap gap-1">
               {receipt.liquid_order_ids.map((id) => (
-                <span key={id} className="font-mono text-[11px] font-semibold text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-100">{id}</span>
+                <span
+                  key={id}
+                  className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded"
+                  style={{ color: "var(--text-secondary)", background: "rgba(255,255,255,0.05)", border: "1px solid var(--card-border)" }}
+                >
+                  {id}
+                </span>
               ))}
             </div>
           </div>
         )}
         {receipt.error && (
-          <div className="mt-3 text-red-500 text-[12px] font-bold bg-red-50 p-2 rounded-lg text-center">Error: {receipt.error}</div>
+          <div className="mt-3 text-[12px] font-bold p-2 rounded-lg text-center" style={{ color: "#ff6b6b", background: "rgba(255,68,68,0.08)" }}>
+            Error: {receipt.error}
+          </div>
         )}
       </div>
     </div>

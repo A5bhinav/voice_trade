@@ -36,22 +36,22 @@ export default function Home() {
   }, [fetchPortfolio]);
 
   return (
-    <div className="flex flex-col h-screen bg-white text-black font-sans items-center">
-      <div className="w-full max-w-4xl flex flex-col h-full bg-white shadow-sm ring-1 ring-zinc-100 overflow-hidden relative">
+    <div className="flex flex-col h-screen font-sans items-center" style={{ background: "var(--background)", color: "var(--foreground)" }}>
+      <div className="w-full max-w-4xl flex flex-col h-full overflow-hidden relative" style={{ background: "var(--background)" }}>
         <Header lastSyncAt={lastSyncAt} />
 
         <div className="flex flex-1 overflow-hidden">
-          {/* Left column: chat + voice (mobile proportions) */}
-          <div className="flex flex-col flex-1 border-r border-zinc-100 bg-white z-10">
+          {/* Left column: chat + voice */}
+          <div className="flex flex-col flex-1 z-10" style={{ borderRight: "1px solid var(--card-border)", background: "var(--background)" }}>
             <ChatPanel />
           </div>
 
           {/* Right column: context (portfolio, markets, actions) */}
-          <div className="w-[340px] flex flex-col gap-6 p-6 overflow-y-auto bg-zinc-50/50">
+          <div className="w-[340px] flex flex-col gap-4 p-4 overflow-y-auto" style={{ background: "var(--background)" }}>
             <MarketsPanel />
             <PortfolioPanel portfolio={portfolio} loading={portfolioLoading} />
             <RiskControls />
-            <div className="mt-8 pt-6 border-t border-zinc-200">
+            <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--card-border)" }}>
                <PanicButton
                  armed={panicArmed}
                  onArmToggle={() => setPanicArmed((a) => !a)}
