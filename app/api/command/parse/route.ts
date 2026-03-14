@@ -1,10 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseCommand } from "@/lib/parser";
+import { logCommand } from "@/lib/audit";
 
-// TODO (Dev C): implement LLM parsing via parser.ts
 export async function POST(req: NextRequest) {
-  const { text } = await req.json();
-  if (!text) return NextResponse.json({ error: "Missing text" }, { status: 400 });
+  try {
+    const body = await req.json();
+    const { text, source } = body as { text: string; source: "chat" | "voice" };
 
-  // Stub: return a clarification until Dev C wires LLM
-  return NextResponse.json({ clarification_needed: `Parsing not yet implemented. You said: "${text}"` });
+    if (!text || typeof text !== "string" || text.trim().length === 0) {
+      return NextResponse.json({ error: "text is required" }, { status: 400 });
+    }
+
+    const result = await parseCommand(text.trim());
+
+    await logCommand({
+      type: "parse",
+      source: source ?? "chat",
+      raw_text: text,
+      parsed: result,
+    });
+
+    return NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Parse failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

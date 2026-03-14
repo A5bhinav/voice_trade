@@ -1,6 +1,8 @@
 /**
  * Append-only JSONL audit logger (A3)
  * Writes to AUDIT_LOG_PATH (default: ./audit.jsonl)
+ * Append-only JSONL audit logger — owned by Dev A.
+ * Stub used by Dev C's parse route.
  */
 
 import fs from "fs";
