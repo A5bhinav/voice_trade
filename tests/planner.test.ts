@@ -33,9 +33,31 @@ describe("TradePlan schema contract", () => {
   });
 });
 
-describe("generateRebalancePlan (stub)", () => {
-  it("throws NotImplemented until Dev C implements it", async () => {
+describe("generateRebalancePlan", () => {
+  it("returns parsed TradePlan from anthropic", async () => {
+    // Mock Anthropic module before importing generateRebalancePlan
+    const mockCreate = jest.fn().mockResolvedValue({
+      content: [
+        {
+          type: "tool_use",
+          input: { 
+            intent_summary: "Test",
+            preconditions: [],
+            actions: [],
+            user_confirmation_required: true,
+            estimated_total_mutations: 0
+           }
+        }
+      ]
+    });
+    jest.mock("@anthropic-ai/sdk", () => {
+      return jest.fn().mockImplementation(() => ({
+        messages: { create: mockCreate }
+      }));
+    });
+
     const { generateRebalancePlan } = require("../lib/planner");
-    await expect(generateRebalancePlan({}, "60% BTC")).rejects.toThrow("not yet implemented");
+    const result = await generateRebalancePlan({}, "60% BTC");
+    expect(result.user_confirmation_required).toBe(true);
   });
 });

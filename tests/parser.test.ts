@@ -7,6 +7,22 @@
 import { isClarificationNeeded, isTradePlan } from "../lib/parser";
 import type { TradeCommand, TradePlan } from "../lib/types";
 
+// Mock Anthropic module before importing parseCommand
+jest.mock("@anthropic-ai/sdk", () => {
+  return jest.fn().mockImplementation(() => ({
+    messages: { 
+      create: jest.fn().mockResolvedValue({
+        content: [
+          {
+            type: "tool_use",
+            input: { action: "place_order", symbol: "BTC-PERP" }
+          }
+        ]
+      })
+    }
+  }));
+});
+
 describe("isClarificationNeeded", () => {
   it("returns true for objects with clarification_needed key", () => {
     expect(isClarificationNeeded({ clarification_needed: "What symbol?" })).toBe(true);
@@ -49,9 +65,10 @@ describe("isTradePlan", () => {
   });
 });
 
-describe("parseCommand (stub)", () => {
-  it("throws NotImplemented until Dev C implements it", async () => {
+describe("parseCommand", () => {
+  it("returns parsed result from anthropic", async () => {
     const { parseCommand } = require("../lib/parser");
-    await expect(parseCommand("buy BTC")).rejects.toThrow("not yet implemented");
+    const result = await parseCommand("buy BTC");
+    expect(result).toEqual({ action: "place_order", symbol: "BTC-PERP" });
   });
 });
