@@ -1,6 +1,6 @@
 {
-  "name": "Voice Trade",
-  "short_name": "Voice Trade",
+  "name": "Pulse",
+  "short_name": "Pulse",
   "description": "Voice-first AI trading copilot",
   "start_url": "/",
   "display": "standalone",

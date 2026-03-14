@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Voice Trade",
+  title: "Pulse",
   description: "Voice-first AI trading copilot",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Voice Trade",
+    title: "Pulse",
   },
   formatDetection: {
     telephone: false,

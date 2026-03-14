@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 interface MarketTicker {
   symbol: string;
   price: number | null;
+  offline?: boolean;
 }
 
 export default function MarketsPanel() {
@@ -30,21 +31,29 @@ export default function MarketsPanel() {
   }
   if (tickers.length === 0) return null;
 
+  const isOffline = tickers.every(t => t.offline);
+
   return (
-    <SectionCard label="Live Markets">
-      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${tickers.length}, 1fr)` }}>
-        {tickers.map((t) => (
-          <div key={t.symbol} className="flex flex-col items-center gap-1 rounded-lg py-3"
-            style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-            <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-3)" }}>
-              {t.symbol.replace("-PERP", "")}
-            </span>
-            <span className="text-[13px] font-semibold font-mono" style={{ color: "var(--text)" }}>
-              {t.price !== null ? `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 1 })}` : "---"}
-            </span>
-          </div>
-        ))}
-      </div>
+    <SectionCard label={isOffline ? "Markets — Offline" : "Live Markets"}>
+      {isOffline ? (
+        <div className="text-[11px] font-medium" style={{ color: "var(--red)" }}>
+          Exchange unreachable. Check API keys.
+        </div>
+      ) : (
+        <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${tickers.length}, 1fr)` }}>
+          {tickers.map((t) => (
+            <div key={t.symbol} className="flex flex-col items-center gap-1 rounded-lg py-3"
+              style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+              <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-3)" }}>
+                {t.symbol.replace("-PERP", "")}
+              </span>
+              <span className="text-[13px] font-semibold font-mono" style={{ color: "var(--text)" }}>
+                {t.price !== null ? `$${t.price.toLocaleString(undefined, { minimumFractionDigits: 1 })}` : "---"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </SectionCard>
   );
 }

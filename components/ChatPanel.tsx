@@ -40,7 +40,7 @@ function isClarification(cmd: ParseResponse): cmd is { clarification_needed: str
 
 export default function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: "0", role: "system", content: "Voice Trade ready. Type a command or hold the mic to speak." },
+    { id: "0", role: "system", content: "Pulse ready. Type a command or hold the mic to speak." },
   ]);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
