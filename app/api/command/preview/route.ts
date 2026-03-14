@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TradeCommand, PreviewCard } from "@/lib/types";
-import { getLiquidClient } from "@/lib/liquid";
+import { LiquidClient } from "@/lib/liquid";
 import { validateSymbol, validateLeverage, validateOrderSize, validateBalance } from "@/lib/validator";
 import { storePendingCommand } from "@/lib/session";
 import { MAX_LEVERAGE, MAX_ORDER_USD } from "@/lib/constants";
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "action is required" }, { status: 400 });
     }
 
-    const liquid = getLiquidClient();
+    const liquid = LiquidClient;
     const warnings: string[] = [];
     const details: Record<string, string | number> = {};
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLiquidClient } from "@/lib/liquid";
+import { LiquidClient } from "@/lib/liquid";
 import { generateRebalancePlan } from "@/lib/planner";
 import { validateSymbol, validateOrderSize, validateLeverage } from "@/lib/validator";
 import { storePendingCommand } from "@/lib/session";
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "text is required" }, { status: 400 });
     }
 
-    const liquid = getLiquidClient();
+    const liquid = LiquidClient;
 
     // Fetch current state
     const [account, positions] = await Promise.all([
@@ -36,12 +36,12 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    const plan = await generateRebalancePlan(text.trim(), {
+    const plan = await generateRebalancePlan({
       balance_usd: account.balance_usd,
       available_usd: account.available_usd,
       positions,
       tickers,
-    });
+    }, text.trim());
 
     // Validate each action in the plan
     const warnings: string[] = [];
