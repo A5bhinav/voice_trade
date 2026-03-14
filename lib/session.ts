@@ -1,4 +1,4 @@
-import { TradeCommand, TradePlan } from "./types";
+import type { TradeCommand, TradePlan } from "./types";
 import { CONFIRMATION_TOKEN_TTL_MS } from "./constants";
 
 interface PendingCommand {

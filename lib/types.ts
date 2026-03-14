@@ -77,3 +77,9 @@ export interface PortfolioSnapshot {
     status: string;
   }[];
 }
+
+export interface ClarificationResponse {
+  clarification_needed: string;
+}
+
+export type ParseResponse = TradeCommand | TradePlan | ClarificationResponse;
