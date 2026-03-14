@@ -50,7 +50,7 @@ export default function PreviewCard({ preview, onCancel, onExecuted }: PreviewCa
       </div>
 
       <div className="space-y-2 mb-4">
-        {Object.entries(preview.details).map(([k, v]) => (
+        {Object.entries(preview.details ?? {}).map(([k, v]) => (
           <div
             key={k}
             className="flex justify-between items-center px-3 py-2 rounded-xl"

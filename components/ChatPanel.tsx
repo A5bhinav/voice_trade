@@ -3,14 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import type {
   ParseResponse,
-  TradeCommand,
   TradePlan,
+  ProposalSet,
+  TradeCommand,
   PreviewCard as PreviewCardType,
   ExecutionReceipt,
 } from "@/lib/types";
 import PreviewCard from "./PreviewCard";
 import RebalancePlan from "./RebalancePlan";
 import TradeReceipt from "./TradeReceipt";
+import ProposalSetView from "./ProposalSetView";
 import VoiceInput from "./VoiceInput";
 
 interface Message {
@@ -18,6 +20,7 @@ interface Message {
   role: "user" | "assistant" | "system";
   content: string;
   preview?: PreviewCardType;
+  proposals?: ProposalSet;
   plan?: TradePlan;
   planToken?: string;
   receipt?: ExecutionReceipt;
@@ -25,7 +28,11 @@ interface Message {
 }
 
 function isTradePlan(cmd: ParseResponse): cmd is TradePlan {
-  return "intent_summary" in cmd;
+  return "actions" in cmd && Array.isArray((cmd as TradePlan).actions);
+}
+
+function isProposalSet(cmd: ParseResponse): cmd is ProposalSet {
+  return "proposals" in cmd && Array.isArray((cmd as ProposalSet).proposals);
 }
 
 function isClarification(cmd: ParseResponse): cmd is { clarification_needed: string } {
@@ -42,6 +49,7 @@ export default function ChatPanel() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [proposalLoading, setProposalLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,7 +73,7 @@ export default function ChatPanel() {
     setLoading(true);
 
     addMessage({ role: "user", content: text });
-    addMessage({ role: "assistant", content: "Parsing…" });
+    addMessage({ role: "assistant", content: "Analyzing markets…" });
 
     try {
       const parseRes = await fetch("/api/command/parse", {
@@ -85,6 +93,16 @@ export default function ChatPanel() {
         return;
       }
 
+      // Vague intent → show ranked proposals
+      if (isProposalSet(parsed)) {
+        updateLastMessage({
+          content: parsed.user_intent,
+          proposals: parsed,
+        });
+        return;
+      }
+
+      // Multi-instrument rebalance plan
       if (isTradePlan(parsed)) {
         updateLastMessage({ content: "Generating rebalance plan…" });
         const prevRes = await fetch("/api/rebalance/preview", {
@@ -105,6 +123,7 @@ export default function ChatPanel() {
         return;
       }
 
+      // Explicit single command
       updateLastMessage({ content: "Validating…" });
       const prevRes = await fetch("/api/command/preview", {
         method: "POST",
@@ -120,17 +139,52 @@ export default function ChatPanel() {
         content: prevData.summary,
         preview: prevData,
       });
-    } catch (e) {
+    } catch {
       updateLastMessage({ content: "Network error. Try again." });
     } finally {
       setLoading(false);
     }
   }
 
+  // User picked a proposal → run preview, then show PreviewCard
+  async function handleProposalSelect(msgId: string, command: TradeCommand) {
+    setProposalLoading(true);
+    try {
+      const prevRes = await fetch("/api/command/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(command),
+      });
+      const prevData = await prevRes.json();
+      if (!prevRes.ok) {
+        // Validation failed (e.g. size below minimum) — show error, keep proposals visible
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === msgId
+              ? { ...m, content: prevData.error ?? "Validation failed" }
+              : m
+          )
+        );
+        return;
+      }
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msgId
+            ? { ...m, proposals: undefined, content: prevData.summary ?? m.content, preview: prevData }
+            : m
+        )
+      );
+    } catch {
+      // leave proposals visible so user can retry
+    } finally {
+      setProposalLoading(false);
+    }
+  }
+
   function handleCancelPreview(msgId: string) {
     setMessages((prev) =>
       prev.map((m) =>
-        m.id === msgId ? { ...m, preview: undefined, plan: undefined, planToken: undefined } : m
+        m.id === msgId ? { ...m, preview: undefined, plan: undefined, planToken: undefined, proposals: undefined } : m
       )
     );
   }
@@ -184,6 +238,17 @@ export default function ChatPanel() {
                   }
                 >
                   {msg.content}
+                </div>
+              )}
+
+              {msg.proposals && (
+                <div className="w-full">
+                  <ProposalSetView
+                    proposalSet={msg.proposals}
+                    onSelect={(cmd) => handleProposalSelect(msg.id, cmd)}
+                    onCancel={() => handleCancelPreview(msg.id)}
+                    loading={proposalLoading}
+                  />
                 </div>
               )}
 
@@ -246,7 +311,7 @@ export default function ChatPanel() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a trade command…"
+            placeholder="Type a trade idea…"
             disabled={loading}
             className="flex-1 rounded-full px-6 py-3 text-[15px] focus:outline-none disabled:opacity-50 transition-all"
             style={{
