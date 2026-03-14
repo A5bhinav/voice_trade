@@ -56,7 +56,7 @@ export default function ChatPanel() {
   // When voice releases, focus the input so the user can immediately edit
   useEffect(() => {
     if (!listening && input) inputRef.current?.focus();
-  }, [listening]);
+  }, [listening, input]);
 
   function addMessage(msg: Omit<Message, "id">) {
     setMessages((prev) => [...prev, { ...msg, id: crypto.randomUUID() }]);

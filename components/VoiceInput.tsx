@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useState } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRecognition = any;
 
 interface VoiceMicProps {
