@@ -34,55 +34,62 @@ export default function RebalancePlan({ plan, confirmationToken, onExecuted, onC
   }
 
   return (
-    <div className="rounded-lg border border-zinc-600 bg-zinc-900 p-4 text-sm">
-      <div className="mb-3">
-        <span className="text-xs uppercase font-semibold text-zinc-400">Rebalance Plan</span>
-        <p className="text-white mt-1">{plan.intent_summary}</p>
+    <div className="rounded-[24px] border border-zinc-200 bg-white p-6 shadow-md max-w-sm mt-2 mb-2">
+      <div className="mb-5 border-b border-zinc-50 pb-4">
+        <span className="text-[10px] font-black uppercase tracking-widest text-[#0000FF]">Rebalance Plan</span>
+        <p className="text-[15px] font-bold text-black mt-2 leading-tight">{plan.intent_summary}</p>
       </div>
 
       {plan.preconditions.length > 0 && (
-        <div className="mb-3">
-          <span className="text-xs text-zinc-500 uppercase">Checks</span>
+        <div className="mb-5 space-y-2 bg-zinc-50 p-3 rounded-2xl border border-zinc-100">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1">Checks</span>
           {plan.preconditions.map((p, i) => (
-            <div key={i} className="text-zinc-300 text-xs ml-2">✓ {p}</div>
+            <div key={i} className="text-black text-[12px] font-semibold flex items-center gap-2">
+              <span className="text-[#0000FF]">✓</span> {p}
+            </div>
           ))}
         </div>
       )}
 
-      <div className="mb-3 space-y-2">
-        <span className="text-xs text-zinc-500 uppercase">Actions ({plan.actions.length})</span>
-        {plan.actions.map((action, i) => (
-          <div key={i} className="flex items-center justify-between bg-zinc-800 rounded px-3 py-2">
-            <div className="flex items-center gap-2">
-              <span className={`text-xs font-semibold uppercase ${action.side === "buy" ? "text-green-400" : "text-red-400"}`}>
-                {action.side}
-              </span>
-              <span className="text-zinc-200">{action.symbol}</span>
-              {action.note && <span className="text-zinc-500 text-xs">{action.note}</span>}
+      <div className="mb-6 space-y-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 ml-1">Actions ({plan.actions.length})</span>
+        <div className="space-y-2">
+          {plan.actions.map((action, i) => (
+            <div key={i} className="flex flex-col bg-zinc-50 rounded-2xl px-4 py-3 border border-zinc-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${action.side === "buy" ? "bg-black text-white" : "bg-zinc-200 text-black"}`}>
+                    {action.side}
+                  </span>
+                  <span className="font-bold text-[14px] text-black">{action.symbol}</span>
+                </div>
+                <span className="font-black text-[14px] text-black">${action.size_usd}</span>
+              </div>
+              {action.note && <span className="text-zinc-500 text-[11px] font-semibold mt-2 border-t border-zinc-100 pt-2">{action.note}</span>}
             </div>
-            <span className="text-zinc-200 font-medium">${action.size_usd}</span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <div className="text-xs text-zinc-500 mb-3">
-        Est. mutations: {plan.estimated_total_mutations}
+      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-5 pl-1">
+        <span>API Mutations</span>
+        <span className="text-black bg-zinc-100 px-2 py-0.5 rounded-full">{plan.estimated_total_mutations}</span>
       </div>
 
-      {error && <div className="text-red-400 text-xs mb-2">{error}</div>}
+      {error && <div className="text-red-500 text-[12px] font-bold mb-4 bg-red-50 p-2 rounded-lg text-center">{error}</div>}
 
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <button
           onClick={handleApprove}
           disabled={loading}
-          className="flex-1 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500 disabled:opacity-50 transition-colors"
+          className="flex-1 py-3.5 rounded-full bg-[#0000FF] text-white text-[13px] font-black uppercase tracking-widest hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
         >
           {loading ? "Executing…" : "Approve Plan"}
         </button>
         <button
           onClick={onCancel}
           disabled={loading}
-          className="flex-1 py-2 rounded bg-zinc-700 text-zinc-200 hover:bg-zinc-600 disabled:opacity-50 transition-colors"
+          className="px-6 py-3.5 rounded-full bg-zinc-100 text-black text-[13px] font-black uppercase tracking-widest hover:bg-zinc-200 disabled:opacity-50 transition-colors"
         >
           Cancel
         </button>

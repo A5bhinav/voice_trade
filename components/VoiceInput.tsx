@@ -82,11 +82,11 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
   return (
     <div className="space-y-2">
       {transcript && (
-        <div className="flex items-center gap-2 rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-200">
-          <span className="flex-1">{transcript}</span>
+        <div className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-[13px] text-black shadow-sm">
+          <span className="flex-1 truncate">{transcript}</span>
           <button
             onClick={handleSubmitTranscript}
-            className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+            className="text-black hover:text-zinc-600 font-bold uppercase tracking-wider text-[10px]"
           >
             Send
           </button>
@@ -98,13 +98,13 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
         onTouchStart={startListening}
         onTouchEnd={stopListening}
         disabled={disabled}
-        className={`w-full py-3 rounded-lg font-semibold text-sm transition-colors select-none ${
+        className={`w-full py-4 rounded-full font-bold text-[14px] uppercase tracking-wider transition-all select-none shadow-sm border ${
           listening
-            ? "bg-red-600 text-white animate-pulse"
-            : "bg-zinc-700 text-zinc-200 hover:bg-zinc-600"
+            ? "bg-red-500 text-white border-red-500 shadow-red-500/20"
+            : "bg-white text-black border-zinc-200 hover:border-black hover:bg-zinc-50 outline-none"
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
-        {listening ? "🎙 Listening… (release to stop)" : "Hold to Talk"}
+        {listening ? "🎙 Listening…" : "Hold to Talk"}
       </button>
     </div>
   );

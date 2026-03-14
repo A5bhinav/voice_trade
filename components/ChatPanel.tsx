@@ -160,13 +160,13 @@ export default function ChatPanel() {
           <div key={msg.id} className={msg.role === "user" ? "flex justify-end" : "flex justify-start"}>
             <div className={`max-w-[85%] space-y-2 ${msg.role === "user" ? "items-end" : "items-start"} flex flex-col`}>
               {msg.role === "system" ? (
-                <div className="text-xs text-zinc-500 text-center w-full">{msg.content}</div>
+                <div className="text-[10px] font-medium text-zinc-400 text-center w-full uppercase tracking-wider my-4">{msg.content}</div>
               ) : (
                 <div
-                  className={`rounded-2xl px-4 py-2 text-sm ${
+                  className={`rounded-2xl px-5 py-3 text-[15px] leading-relaxed max-w-[90%] shadow-sm border ${
                     msg.role === "user"
-                      ? "bg-blue-600 text-white rounded-br-sm"
-                      : "bg-zinc-800 text-zinc-200 rounded-bl-sm"
+                      ? "bg-black text-white rounded-br-sm border-black"
+                      : "bg-white text-black rounded-bl-sm border-zinc-200"
                   }`}
                 >
                   {msg.content}
@@ -213,7 +213,7 @@ export default function ChatPanel() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t border-zinc-800 px-4 py-3 space-y-2">
+      <div className="border-t border-zinc-100 px-6 py-4 space-y-3 bg-white">
         <VoiceInput
           onTranscript={(text) => {
             setInput(text);
@@ -234,12 +234,12 @@ export default function ChatPanel() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type a trade command…"
             disabled={loading}
-            className="flex-1 rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            className="flex-1 rounded-full bg-zinc-100 px-6 py-3 text-[15px] text-black placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-50 transition-all border border-transparent focus:bg-white"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 rounded-full bg-black text-white text-[15px] font-bold hover:bg-zinc-800 disabled:opacity-30 disabled:hover:bg-black transition-colors"
           >
             Send
           </button>
