@@ -77,10 +77,3 @@ export interface PortfolioSnapshot {
     status: string;
   }[];
 }
-
-export interface ClarificationNeeded {
-  action: null;
-  clarification_needed: string;
-}
-
-export type ParseResult = TradeCommand | TradePlan | ClarificationNeeded;

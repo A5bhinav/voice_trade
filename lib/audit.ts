@@ -1,51 +1,47 @@
 /**
+ * Append-only JSONL audit logger (A3)
+ * Writes to AUDIT_LOG_PATH (default: ./audit.jsonl)
  * Append-only JSONL audit logger — owned by Dev A.
  * Stub used by Dev C's parse route.
  */
 
 import fs from "fs";
 import path from "path";
+import { AUDIT_LOG_PATH } from "./constants";
 
-const AUDIT_PATH = process.env.AUDIT_LOG_PATH ?? "./audit.jsonl";
+type AuditType = "command" | "execution" | "panic" | "error";
 
 interface AuditEntry {
   ts: string;
-  type: string;
-  [key: string]: unknown;
+  type: AuditType;
+  session_id: string;
+  payload: unknown;
+  result?: unknown;
 }
 
 function appendEntry(entry: AuditEntry): void {
+  const line = JSON.stringify(entry) + "\n";
+  const resolved = path.resolve(AUDIT_LOG_PATH);
   try {
-    const line = JSON.stringify(entry) + "\n";
-    fs.appendFileSync(path.resolve(AUDIT_PATH), line, "utf-8");
-  } catch {
-    // Non-fatal: don't let audit failures break the request
-    console.error("[audit] Failed to write entry:", entry.type);
+    fs.appendFileSync(resolved, line, "utf8");
+  } catch (err) {
+    // audit must not crash the app
+    console.error("[audit] failed to write:", err);
   }
 }
 
-export function logCommand(entry: {
-  type: string;
-  source: "chat" | "voice";
-  raw_text: string;
-  parsed: unknown;
-}): void {
-  appendEntry({ ts: new Date().toISOString(), ...entry });
+export function logCommand(payload: unknown, session_id = "anon", result?: unknown): void {
+  appendEntry({ ts: new Date().toISOString(), type: "command", session_id, payload, result });
 }
 
-export function logExecution(entry: {
-  type: string;
-  session_id?: string;
-  payload: unknown;
-  result: unknown;
-}): void {
-  appendEntry({ ts: new Date().toISOString(), ...entry });
+export function logExecution(payload: unknown, session_id = "anon", result?: unknown): void {
+  appendEntry({ ts: new Date().toISOString(), type: "execution", session_id, payload, result });
 }
 
-export function logPanic(entry: {
-  session_id?: string;
-  payload: unknown;
-  result: unknown;
-}): void {
-  appendEntry({ ts: new Date().toISOString(), type: "panic", ...entry });
+export function logPanic(payload: unknown, session_id = "anon", result?: unknown): void {
+  appendEntry({ ts: new Date().toISOString(), type: "panic", session_id, payload, result });
+}
+
+export function logError(payload: unknown, session_id = "anon"): void {
+  appendEntry({ ts: new Date().toISOString(), type: "error", session_id, payload });
 }
