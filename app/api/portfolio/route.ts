@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import { LiquidClient } from "@/lib/liquid";
 import type { PortfolioSnapshot } from "@/lib/types";
 
-// TODO (Dev A): replace with LiquidClient.getAccount() + getPositions() + getOpenOrders()
-export async function GET() {
-  const snapshot: PortfolioSnapshot = {
-    account: { balance_usd: 0, available_usd: 0 },
-    positions: [],
-    open_orders: [],
-  };
-  return NextResponse.json(snapshot);
+export async function GET(): Promise<NextResponse<PortfolioSnapshot | { error: string }>> {
+  try {
+    const snapshot = await LiquidClient.getPortfolioSnapshot();
+    return NextResponse.json(snapshot);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
