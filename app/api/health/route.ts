@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { liquidClient } from "@/lib/liquid";
+import { LiquidClient } from "@/lib/liquid";
 
-export async function GET() {
-  const health = await liquidClient.getHealth();
+export async function GET(): Promise<NextResponse> {
+  const { ok } = await LiquidClient.getHealth();
   return NextResponse.json({
-    ok: true,
-    liquid: health.status === "ok",
+    ok,
+    liquid: ok,
     timestamp: new Date().toISOString(),
   });
 }

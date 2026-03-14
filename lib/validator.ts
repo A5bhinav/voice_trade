@@ -1,13 +1,14 @@
-import {
-  MAX_LEVERAGE,
-  MAX_ORDER_USD,
-  MIN_ORDER_USD,
-  SUPPORTED_SYMBOLS,
-} from "./constants";
-import { peekPendingCommand } from "./session";
+/**
+ * Server-side trade validator (A2)
+ * All functions throw on violation — deterministic, no side effects.
+ */
+
+import { SUPPORTED_SYMBOLS, MAX_LEVERAGE, MIN_ORDER_USD, MAX_ORDER_USD } from "./constants";
+import { consumePendingCommand } from "./session";
+import type { TradeCommand, TradePlan } from "./types";
 
 export function validateSymbol(symbol: string | undefined): void {
-  if (!symbol) throw new Error("Symbol is required");
+  if (!symbol) throw new Error("symbol is required");
   if (!SUPPORTED_SYMBOLS.includes(symbol)) {
     throw new Error(
       `Unsupported symbol "${symbol}". Supported: ${SUPPORTED_SYMBOLS.join(", ")}`
@@ -16,16 +17,15 @@ export function validateSymbol(symbol: string | undefined): void {
 }
 
 export function validateLeverage(leverage: number | undefined): void {
-  if (leverage === undefined || leverage === null) return; // leverage is optional
-  if (leverage <= 0) throw new Error("Leverage must be greater than 0");
-  if (leverage > MAX_LEVERAGE) {
-    throw new Error(`Leverage ${leverage}x exceeds maximum ${MAX_LEVERAGE}x`);
+  if (leverage === undefined) return;
+  if (leverage < 1 || leverage > MAX_LEVERAGE) {
+    throw new Error(`Leverage must be between 1 and ${MAX_LEVERAGE}. Got: ${leverage}`);
   }
 }
 
 export function validateOrderSize(size_usd: number | undefined): void {
   if (size_usd === undefined || size_usd === null) {
-    throw new Error("Order size (size_usd) is required");
+    throw new Error("size_usd is required");
   }
   if (size_usd < MIN_ORDER_USD) {
     throw new Error(`Order size $${size_usd} is below minimum $${MIN_ORDER_USD}`);
@@ -38,12 +38,28 @@ export function validateOrderSize(size_usd: number | undefined): void {
 export function validateBalance(size_usd: number, available_usd: number): void {
   if (size_usd > available_usd) {
     throw new Error(
-      `Insufficient balance: order $${size_usd} exceeds available $${available_usd.toFixed(2)}`
+      `Insufficient balance. Required: $${size_usd}, Available: $${available_usd.toFixed(2)}`
     );
   }
 }
 
-export function validateConfirmationToken(token: string): void {
-  // peekPendingCommand throws if token is missing or expired
-  peekPendingCommand(token);
+export function validateConfirmationToken(token: string): TradeCommand | TradePlan {
+  // consumePendingCommand throws if invalid or expired
+  return consumePendingCommand(token);
+}
+
+export function validateTradeCommand(
+  cmd: TradeCommand,
+  available_usd: number
+): void {
+  if (cmd.action === "place_order") {
+    validateSymbol(cmd.symbol);
+    validateOrderSize(cmd.size_usd);
+    validateLeverage(cmd.leverage);
+    validateBalance(cmd.size_usd!, available_usd);
+  } else if (cmd.action === "close_position") {
+    validateSymbol(cmd.symbol);
+  } else if (cmd.action === "set_tp_sl") {
+    validateSymbol(cmd.symbol);
+  }
 }

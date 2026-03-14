@@ -1,88 +1,99 @@
 import { NextRequest, NextResponse } from "next/server";
-import { consumePendingCommand } from "@/lib/session";
-import { liquidClient } from "@/lib/liquid";
-import { logExecution } from "@/lib/audit";
-import type { TradeCommand, ExecutionReceipt } from "@/lib/types";
+import { LiquidClient } from "@/lib/liquid";
+import { validateConfirmationToken } from "@/lib/validator";
+import { logExecution, logError } from "@/lib/audit";
+import type { ExecutionReceipt, TradeCommand } from "@/lib/types";
 
-export async function POST(req: NextRequest) {
-  let body: { confirmation_token: string };
+function isTradePlan(cmd: unknown): cmd is { actions: TradeCommand[] } {
+  return typeof cmd === "object" && cmd !== null && Array.isArray((cmd as { actions?: unknown }).actions);
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  let body: { confirmation_token?: string };
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { confirmation_token } = body ?? {};
+  const { confirmation_token } = body;
   if (!confirmation_token) {
-    return NextResponse.json({ error: "Missing confirmation_token" }, { status: 400 });
+    return NextResponse.json({ error: "confirmation_token required" }, { status: 400 });
   }
 
   let command: TradeCommand;
   try {
-    const pending = consumePendingCommand(confirmation_token);
-    // Panic tokens should not be executed via this route
-    if ("intent_summary" in pending) {
-      return NextResponse.json({ error: "Use /api/rebalance/execute for trade plans" }, { status: 400 });
+    const resolved = validateConfirmationToken(confirmation_token);
+    if (isTradePlan(resolved)) {
+      return NextResponse.json(
+        { error: "Use /api/rebalance/execute for TradePlan tokens" },
+        { status: 400 }
+      );
     }
-    command = pending as TradeCommand;
-    if (command.action === "panic") {
-      return NextResponse.json({ error: "Use /api/panic/execute for panic actions" }, { status: 400 });
-    }
-  } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Invalid token" },
-      { status: 400 }
-    );
+    command = resolved as TradeCommand;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: msg }, { status: 400 });
   }
 
   const receiptId = crypto.randomUUID();
-  const receipt: ExecutionReceipt = {
-    id: receiptId,
-    type: "order",
-    status: "failed",
-    liquid_order_ids: [],
-    timestamp: new Date().toISOString(),
-  };
+  const timestamp = new Date().toISOString();
 
   try {
+    let orderId: string | null = null;
+
     if (command.action === "place_order") {
-      if (!command.symbol || !command.side || !command.size_usd) {
-        throw new Error("Missing required fields: symbol, side, size_usd");
+      if (!command.symbol || !command.side || !command.order_type || !command.size_usd) {
+        return NextResponse.json({ error: "Missing required order fields" }, { status: 400 });
       }
-      const order = await liquidClient.placeOrder({
+      const order = await LiquidClient.placeOrder({
         symbol: command.symbol,
         side: command.side,
-        order_type: command.order_type ?? "market",
+        order_type: command.order_type,
         size_usd: command.size_usd,
         price: command.price,
         leverage: command.leverage,
+        tp: command.tp,
+        sl: command.sl,
+        reduce_only: command.reduce_only,
       });
-      receipt.status = "executed";
-      receipt.liquid_order_ids = [String(order.id)];
+      orderId = order.id;
     } else if (command.action === "close_position") {
-      if (!command.symbol) throw new Error("Missing symbol for close_position");
-      const positions = await liquidClient.getPositions();
-      const position = positions.find(
-        (p) =>
-          p.product_code.toUpperCase().includes((command.symbol ?? "").replace("-PERP", ""))
-      );
-      if (!position) throw new Error(`No open position found for ${command.symbol}`);
-      await liquidClient.closePosition(String(position.id));
-      receipt.status = "executed";
+      if (!command.symbol) {
+        return NextResponse.json({ error: "symbol required for close_position" }, { status: 400 });
+      }
+      const order = await LiquidClient.closePosition(command.symbol);
+      orderId = order.id;
     } else if (command.action === "cancel_all_orders") {
-      const cancelled = await liquidClient.cancelAllOrders();
-      receipt.status = "executed";
-      receipt.liquid_order_ids = [`cancelled:${cancelled}`];
+      await LiquidClient.cancelAllOrders();
     } else {
-      throw new Error(`Unsupported action: ${command.action}`);
+      return NextResponse.json(
+        { error: `Action "${command.action}" not supported via this route` },
+        { status: 400 }
+      );
     }
 
-    logExecution(command, receipt);
+    const receipt: ExecutionReceipt = {
+      id: receiptId,
+      type: "order",
+      status: "executed",
+      liquid_order_ids: orderId ? [orderId] : [],
+      timestamp,
+    };
+
+    logExecution({ command }, "anon", receipt);
     return NextResponse.json(receipt);
-  } catch (e) {
-    receipt.status = "failed";
-    receipt.error = e instanceof Error ? e.message : "Execution failed";
-    logExecution(command, receipt);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logError({ command, error: msg });
+    const receipt: ExecutionReceipt = {
+      id: receiptId,
+      type: "order",
+      status: "failed",
+      liquid_order_ids: [],
+      error: msg,
+      timestamp,
+    };
     return NextResponse.json(receipt, { status: 500 });
   }
 }

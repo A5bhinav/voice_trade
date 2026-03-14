@@ -1,66 +1,34 @@
-import { describe, it, expect, vi } from "vitest";
-import { MutationQueue } from "@/lib/queue";
+import { runSequential } from "../lib/queue";
 
-describe("MutationQueue", () => {
-  it("executes a task and returns its value", async () => {
-    const queue = new MutationQueue();
-    const result = await queue.enqueue(async () => 42);
-    expect(result).toEqual({ value: 42 });
+describe("runSequential", () => {
+  it("runs all tasks and returns results in order", async () => {
+    const tasks = [
+      () => Promise.resolve("a"),
+      () => Promise.resolve("b"),
+      () => Promise.resolve("c"),
+    ];
+    const results = await runSequential(tasks, 0);
+    expect(results).toHaveLength(3);
+    expect(results[0]).toEqual({ index: 0, ok: true, value: "a" });
+    expect(results[1]).toEqual({ index: 1, ok: true, value: "b" });
+    expect(results[2]).toEqual({ index: 2, ok: true, value: "c" });
   });
 
-  it("captures errors without throwing", async () => {
-    const queue = new MutationQueue();
-    const result = await queue.enqueue(async () => {
-      throw new Error("test error");
-    });
-    expect(result.error).toBe("test error");
-    expect(result.value).toBeUndefined();
+  it("records partial failures without stopping", async () => {
+    const tasks = [
+      () => Promise.resolve("ok"),
+      () => Promise.reject(new Error("boom")),
+      () => Promise.resolve("also ok"),
+    ];
+    const results = await runSequential(tasks, 0);
+    expect(results[0].ok).toBe(true);
+    expect(results[1].ok).toBe(false);
+    expect(results[1].error).toBe("boom");
+    expect(results[2].ok).toBe(true);
   });
 
-  it("processes tasks sequentially", async () => {
-    const queue = new MutationQueue();
-    const order: number[] = [];
-
-    const p1 = queue.enqueue(async () => {
-      order.push(1);
-      return 1;
-    });
-    const p2 = queue.enqueue(async () => {
-      order.push(2);
-      return 2;
-    });
-    const p3 = queue.enqueue(async () => {
-      order.push(3);
-      return 3;
-    });
-
-    await Promise.all([p1, p2, p3]);
-    expect(order).toEqual([1, 2, 3]);
-  });
-
-  it("continues processing after a failure", async () => {
-    const queue = new MutationQueue();
-
-    const results = await queue.runAll([
-      async () => "a",
-      async () => {
-        throw new Error("fail");
-      },
-      async () => "c",
-    ]);
-
-    expect(results[0]).toEqual({ value: "a" });
-    expect(results[1].error).toBe("fail");
-    expect(results[2]).toEqual({ value: "c" });
-  });
-
-  it("runAll returns results in order", async () => {
-    const queue = new MutationQueue();
-    const results = await queue.runAll([
-      async () => 10,
-      async () => 20,
-      async () => 30,
-    ]);
-    expect(results.map((r) => r.value)).toEqual([10, 20, 30]);
+  it("returns empty for no tasks", async () => {
+    const results = await runSequential([], 0);
+    expect(results).toHaveLength(0);
   });
 });

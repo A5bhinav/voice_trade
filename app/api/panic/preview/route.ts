@@ -1,35 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import { liquidClient } from "@/lib/liquid";
+import { getLiquidClient } from "@/lib/liquid";
 import { storePendingCommand } from "@/lib/session";
-import type { PanicPreview, TradeCommand } from "@/lib/types";
+import { PanicPreview } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   try {
-    // Fetch current state
+    const body = await req.json();
+    const { armed } = body as { armed: boolean };
+
+    const liquid = getLiquidClient();
+
     const [openOrders, positions] = await Promise.all([
-      liquidClient.getOpenOrders().catch(() => []),
-      liquidClient.getPositions().catch(() => []),
+      liquid.getOpenOrders(),
+      liquid.getPositions(),
     ]);
 
-    // Store a panic authorization token
-    const panicCommand: TradeCommand = { action: "panic", urgency: "panic" };
-    const confirmation_token = storePendingCommand(panicCommand);
+    const openPositions = positions.map((p) => ({
+      symbol: p.symbol,
+      size: p.size,
+    }));
+
+    // 1 mutation per order cancel-all (counts as 1) + 1 per position close
+    const estimatedMutations = 1 + openPositions.length;
+
+    // Store a panic command as the pending command
+    const confirmation_token = storePendingCommand({
+      action: "panic",
+      urgency: "panic",
+    });
 
     const preview: PanicPreview = {
       open_orders_count: openOrders.length,
-      open_positions: positions.map((p) => ({
-        symbol: p.product_code,
-        size: parseFloat(p.quantity) || 0,
-      })),
-      estimated_mutations: openOrders.length + positions.length,
+      open_positions: openPositions,
+      estimated_mutations: estimatedMutations,
       confirmation_token,
     };
 
     return NextResponse.json(preview);
-  } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Panic preview failed" },
-      { status: 500 }
-    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Panic preview failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

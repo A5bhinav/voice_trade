@@ -1,8 +1,11 @@
-import { liquidClient } from "./liquid";
-import { MutationQueue } from "./queue";
-import { consumePendingCommand } from "./session";
+/**
+ * Panic flow orchestration (A5 / panic.ts)
+ * Sequential: cancel all orders first, then close each position via queue.
+ */
+
+import { LiquidClient } from "./liquid";
+import { runSequential } from "./queue";
 import { logPanic } from "./audit";
-import type { TradeCommand } from "./types";
 
 export interface PanicResult {
   orders_cancelled: number;
@@ -10,53 +13,41 @@ export interface PanicResult {
   failures: string[];
 }
 
-export async function orchestratePanic(confirmationToken: string): Promise<PanicResult> {
-  // Validate and consume token — throws if invalid/expired
-  const command = consumePendingCommand(confirmationToken) as TradeCommand;
-  if (command.action !== "panic") {
-    throw new Error("Invalid token: not a panic authorization");
-  }
-
-  const queue = new MutationQueue();
+export async function executePanic(session_id = "anon"): Promise<PanicResult> {
   const failures: string[] = [];
   let orders_cancelled = 0;
+
+  // Step 1: cancel all open orders
+  try {
+    const result = await LiquidClient.cancelAllOrders();
+    orders_cancelled = result.cancelled;
+  } catch (err) {
+    failures.push(
+      `cancel_all_orders: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  // Step 2: close each position sequentially via queue
+  const positions = await LiquidClient.getPositions().catch(() => []);
+  const symbols = positions.map((p) => p.symbol);
+
+  const closeTasks = symbols.map(
+    (symbol) => () => LiquidClient.closePosition(symbol)
+  );
+
+  const results = await runSequential(closeTasks);
   const positions_closed: string[] = [];
 
-  // Step 1: fetch current state
-  const [openOrders, positions] = await Promise.all([
-    liquidClient.getOpenOrders(),
-    liquidClient.getPositions(),
-  ]);
-
-  // Step 2: cancel all open orders
-  const cancelTasks = openOrders.map((order) => () => liquidClient.cancelOrder(String(order.id)));
-  const cancelResults = await queue.runAll(cancelTasks);
-  cancelResults.forEach((r, i) => {
-    if (r.error) {
-      failures.push(`Cancel order ${openOrders[i].id}: ${r.error}`);
+  for (const r of results) {
+    if (r.ok) {
+      positions_closed.push(symbols[r.index]);
     } else {
-      orders_cancelled++;
+      failures.push(`close_position(${symbols[r.index]}): ${r.error}`);
     }
-  });
+  }
 
-  // Step 3: close all positions
-  const closeTasks = positions.map((pos) => () => liquidClient.closePosition(String(pos.id)));
-  const closeResults = await queue.runAll(closeTasks);
-  closeResults.forEach((r, i) => {
-    const symbol =
-      positions[i].product_code.replace("USD", "-PERP") || positions[i].product_code;
-    if (r.error) {
-      failures.push(`Close position ${positions[i].id} (${symbol}): ${r.error}`);
-    } else {
-      positions_closed.push(symbol);
-    }
-  });
+  const panicResult: PanicResult = { orders_cancelled, positions_closed, failures };
+  logPanic({ symbols, orders_cancelled }, session_id, panicResult);
 
-  logPanic({ orders: openOrders.length, positions: positions.length }, {
-    orders_cancelled,
-    positions_closed,
-    failures,
-  });
-
-  return { orders_cancelled, positions_closed, failures };
+  return panicResult;
 }
