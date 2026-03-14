@@ -7,48 +7,36 @@ interface TradeReceiptProps {
 }
 
 export default function TradeReceipt({ receipt }: TradeReceiptProps) {
-  const statusStyle =
-    receipt.status === "executed"
-      ? { color: "var(--accent)" }
-      : receipt.status === "partial"
-      ? { color: "#ffb347" }
-      : { color: "#ff6b6b" };
+  const statusColor =
+    receipt.status === "executed" ? "var(--green)" :
+    receipt.status === "partial"  ? "var(--amber)" : "var(--red)";
+  const statusBg =
+    receipt.status === "executed" ? "var(--green-dim)" :
+    receipt.status === "partial"  ? "var(--amber-dim)" : "var(--red-dim)";
 
   return (
-    <div className="rounded-2xl p-5 mt-2 mb-2 max-w-sm" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-      <div className="flex items-center justify-between mb-4 pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
-        <span className="font-bold text-[14px] capitalize" style={{ color: "var(--foreground)" }}>
-          {receipt.type} Receipt
-        </span>
-        <span className="text-[11px] font-black uppercase tracking-wider" style={statusStyle}>
+    <div className="rounded-xl overflow-hidden w-full max-w-sm" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+      <div className="flex items-center justify-between px-4 py-3" style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
+        <span className="text-[13px] font-semibold capitalize" style={{ color: "var(--text)" }}>{receipt.type} Receipt</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+          style={{ background: statusBg, color: statusColor }}>
           {receipt.status}
         </span>
       </div>
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>ID</span>
-          <span className="font-mono text-[12px] font-semibold px-2 py-0.5 rounded" style={{ color: "var(--text-secondary)", background: "rgba(255,255,255,0.05)" }}>
-            {receipt.id.slice(0, 12)}…
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>Time</span>
-          <span className="text-[12px] font-semibold" style={{ color: "var(--foreground)" }}>
-            {new Date(receipt.timestamp).toLocaleTimeString()}
-          </span>
-        </div>
+      <div className="px-4 py-3 space-y-2">
+        <Row label="ID">
+          <span className="font-mono text-[11px]" style={{ color: "var(--text-2)" }}>{receipt.id.slice(0, 14)}&hellip;</span>
+        </Row>
+        <Row label="Time">
+          <span className="font-mono text-[12px]" style={{ color: "var(--text)" }}>{new Date(receipt.timestamp).toLocaleTimeString()}</span>
+        </Row>
         {receipt.liquid_order_ids.length > 0 && (
-          <div className="pt-2" style={{ borderTop: "1px dashed var(--card-border)" }}>
-            <span className="text-[11px] font-bold uppercase tracking-widest block mb-1" style={{ color: "var(--text-secondary)" }}>
-              Order IDs
-            </span>
+          <div className="pt-1" style={{ borderTop: "1px solid var(--border)" }}>
+            <div className="text-[9px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-3)" }}>Order IDs</div>
             <div className="flex flex-wrap gap-1">
               {receipt.liquid_order_ids.map((id) => (
-                <span
-                  key={id}
-                  className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded"
-                  style={{ color: "var(--text-secondary)", background: "rgba(255,255,255,0.05)", border: "1px solid var(--card-border)" }}
-                >
+                <span key={id} className="font-mono text-[10px] px-1.5 py-0.5 rounded"
+                  style={{ background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
                   {id}
                 </span>
               ))}
@@ -56,11 +44,21 @@ export default function TradeReceipt({ receipt }: TradeReceiptProps) {
           </div>
         )}
         {receipt.error && (
-          <div className="mt-3 text-[12px] font-bold p-2 rounded-lg text-center" style={{ color: "#ff6b6b", background: "rgba(255,68,68,0.08)" }}>
-            Error: {receipt.error}
+          <div className="rounded-lg px-3 py-2 text-[11px] font-medium"
+            style={{ background: "var(--red-dim)", color: "var(--red)" }}>
+            {receipt.error}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[10px] font-medium uppercase tracking-widest" style={{ color: "var(--text-3)" }}>{label}</span>
+      {children}
     </div>
   );
 }

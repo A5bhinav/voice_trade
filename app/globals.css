@@ -1,49 +1,77 @@
 @import "tailwindcss";
 
 :root {
-  --background: #05080f;
-  --foreground: #e8edf5;
-  --card-bg: #0d1526;
-  --card-border: #1e2d4a;
-  --accent: #4a90d9;
-  --accent-bright: #6ab0f5;
-  --accent-dim: #1e3a5f;
-  --text-secondary: #7a90b0;
+  --bg:          #070c18;
+  --surface:     #0c1427;
+  --surface-2:   #111e38;
+  --border:      rgba(255, 255, 255, 0.07);
+  --border-2:    rgba(255, 255, 255, 0.13);
+  --blue:        #3d7fff;
+  --blue-bright: #6aa3ff;
+  --blue-dim:    rgba(61, 127, 255, 0.12);
+  --blue-glow:   rgba(61, 127, 255, 0.35);
+  --text:        #dde6f5;
+  --text-2:      #7a95bb;
+  --text-3:      #3d5270;
+  --green:       #20c97a;
+  --green-dim:   rgba(32, 201, 122, 0.12);
+  --red:         #f04545;
+  --red-dim:     rgba(240, 69, 69, 0.12);
+  --amber:       #f0ae30;
+  --amber-dim:   rgba(240, 174, 48, 0.12);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-.glow-blue {
-  box-shadow: 0 0 20px rgba(74, 144, 217, 0.3), 0 0 60px rgba(74, 144, 217, 0.1);
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+/* Sonar rings for mic listening state */
+@keyframes sonar {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  100% { transform: scale(2.2); opacity: 0; }
 }
 
-.glow-blue-pulse {
-  box-shadow: 0 0 30px rgba(74, 144, 217, 0.5), 0 0 80px rgba(74, 144, 217, 0.2);
-  animation: pulse-glow 1.5s ease-in-out infinite;
+.sonar-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--blue);
+  animation: sonar 2s ease-out infinite;
+  pointer-events: none;
 }
+.sonar-ring:nth-child(2) { animation-delay: 0.65s; }
+.sonar-ring:nth-child(3) { animation-delay: 1.3s; }
 
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 30px rgba(74, 144, 217, 0.5), 0 0 80px rgba(74, 144, 217, 0.2); }
-  50% { box-shadow: 0 0 50px rgba(74, 144, 217, 0.8), 0 0 120px rgba(74, 144, 217, 0.4); }
+/* Pulsing live dot */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
 }
+.live-dot { animation: live-pulse 2s ease-in-out infinite; }
 
-.mic-glow {
-  box-shadow: 0 0 40px rgba(255, 255, 255, 0.5), 0 0 100px rgba(74, 144, 217, 0.4);
-  animation: mic-pulse 2s ease-in-out infinite;
+/* Fade-in for messages */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-@keyframes mic-pulse {
-  0%, 100% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.5), 0 0 100px rgba(74, 144, 217, 0.4); }
-  50% { box-shadow: 0 0 70px rgba(255, 255, 255, 0.8), 0 0 140px rgba(74, 144, 217, 0.6); }
-}
+.msg-in { animation: fade-up 0.18s ease-out forwards; }

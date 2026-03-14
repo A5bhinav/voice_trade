@@ -34,97 +34,81 @@ export default function RebalancePlan({ plan, confirmationToken, onExecuted, onC
   }
 
   return (
-    <div className="rounded-2xl p-5 mt-2 mb-2 max-w-sm" style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
-      <div className="mb-4 pb-4" style={{ borderBottom: "1px solid var(--card-border)" }}>
-        <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: "var(--accent)" }}>
-          AI Agent Proposal
-        </span>
-        <p className="text-[14px] font-bold mt-2 leading-tight" style={{ color: "var(--foreground)" }}>
-          {plan.intent_summary}
-        </p>
+    <div className="rounded-xl overflow-hidden w-full max-w-sm" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+      {/* Header */}
+      <div className="px-4 py-3" style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
+        <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--blue-bright)" }}>AI Proposal</span>
+        <p className="text-[13px] font-semibold mt-1 leading-snug" style={{ color: "var(--text)" }}>{plan.intent_summary}</p>
       </div>
 
-      {plan.preconditions.length > 0 && (
-        <div className="mb-4 space-y-2 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}>
-          <span className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: "var(--text-secondary)" }}>
-            Checks
-          </span>
-          {plan.preconditions.map((p, i) => (
-            <div key={i} className="text-[12px] font-semibold flex items-center gap-2" style={{ color: "var(--foreground)" }}>
-              <span style={{ color: "var(--accent)" }}>✓</span> {p}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="mb-5 space-y-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: "var(--text-secondary)" }}>
-          Proposed Moves ({plan.actions.length})
-        </span>
-        <div className="space-y-1.5">
-          {plan.actions.map((action, i) => (
-            <div
-              key={i}
-              className="flex flex-col rounded-xl px-3 py-2.5"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--card-border)" }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{
-                      background: action.side === "buy" ? "var(--accent)" : "#ff4444",
-                      boxShadow: action.side === "buy" ? "0 0 6px rgba(74,144,217,0.6)" : "0 0 6px rgba(255,68,68,0.6)",
-                    }}
-                  />
-                  <span className="font-semibold text-[13px]" style={{ color: "var(--foreground)" }}>
-                    {action.side === "buy" ? "Buy" : "Sell"} {action.symbol}
-                  </span>
-                </div>
-                <span className="font-black text-[13px]" style={{ color: "var(--foreground)" }}>${action.size_usd}</span>
+      <div className="px-4 py-3 space-y-3">
+        {/* Preconditions */}
+        {plan.preconditions.length > 0 && (
+          <div className="rounded-lg px-3 py-2.5 space-y-1.5" style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+            <span className="text-[9px] font-bold uppercase tracking-widest block" style={{ color: "var(--text-3)" }}>Checks</span>
+            {plan.preconditions.map((p, i) => (
+              <div key={i} className="flex items-start gap-2 text-[11px] font-medium" style={{ color: "var(--text-2)" }}>
+                <span style={{ color: "var(--green)" }}>&#10003;</span><span>{p}</span>
               </div>
-              {action.note && (
-                <span className="text-[11px] font-semibold mt-1.5 pt-1.5" style={{ color: "var(--text-secondary)", borderTop: "1px solid var(--card-border)" }}>
-                  {action.note}
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="space-y-1.5">
+          <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--text-3)" }}>
+            Moves ({plan.actions.length})
+          </span>
+          {plan.actions.map((action, i) => (
+            <div key={i} className="flex items-center justify-between rounded-lg px-3 py-2.5"
+              style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{
+                    background: action.side === "buy" ? "var(--green)" : "var(--red)",
+                    boxShadow: action.side === "buy" ? "0 0 6px rgba(32,201,122,0.5)" : "0 0 6px rgba(240,69,69,0.5)",
+                  }}
+                />
+                <span className="text-[12px] font-medium" style={{ color: "var(--text)" }}>
+                  <span className="font-bold" style={{ color: action.side === "buy" ? "var(--green)" : "var(--red)" }}>
+                    {action.side === "buy" ? "Buy" : "Sell"}
+                  </span>{" "}{action.symbol}
                 </span>
-              )}
+              </div>
+              <span className="text-[12px] font-semibold font-mono" style={{ color: "var(--text)" }}>${action.size_usd}</span>
             </div>
           ))}
         </div>
-      </div>
 
-      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider mb-4 pl-1" style={{ color: "var(--text-secondary)" }}>
-        <span>API Mutations</span>
-        <span
-          className="px-2 py-0.5 rounded-full"
-          style={{ background: "rgba(74,144,217,0.1)", color: "var(--accent)", border: "1px solid rgba(74,144,217,0.2)" }}
-        >
-          {plan.estimated_total_mutations}
-        </span>
-      </div>
-
-      {error && (
-        <div className="text-[12px] font-bold mb-4 p-2 rounded-lg text-center" style={{ color: "#ff6b6b", background: "rgba(255,68,68,0.08)", border: "1px solid rgba(255,68,68,0.2)" }}>
-          {error}
+        {/* Mutations */}
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-medium" style={{ color: "var(--text-3)" }}>API Mutations</span>
+          <span className="text-[11px] font-semibold font-mono px-2 py-0.5 rounded"
+            style={{ background: "var(--blue-dim)", color: "var(--blue-bright)" }}>
+            {plan.estimated_total_mutations}
+          </span>
         </div>
-      )}
 
-      <div className="flex gap-3">
-        <button
-          onClick={onCancel}
-          disabled={loading}
-          className="flex-1 py-3 rounded-full text-[13px] font-black uppercase tracking-widest transition-colors disabled:opacity-50"
-          style={{ background: "rgba(255,255,255,0.06)", color: "var(--foreground)", border: "1px solid var(--card-border)" }}
-        >
+        {error && (
+          <div className="rounded-lg px-3 py-2 text-[11px] font-medium text-center"
+            style={{ background: "var(--red-dim)", color: "var(--red)", border: "1px solid rgba(240,69,69,0.25)" }}>
+            {error}
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2 px-4 pb-4">
+        <button onClick={onCancel} disabled={loading}
+          className="flex-1 py-2.5 rounded-lg text-[12px] font-semibold transition-all disabled:opacity-40"
+          style={{ background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
           Cancel
         </button>
-        <button
-          onClick={handleApprove}
-          disabled={loading}
-          className="flex-1 py-3.5 rounded-full text-[13px] font-black uppercase tracking-widest transition-colors disabled:opacity-50 shadow-sm"
-          style={{ background: "var(--accent)", color: "#05080f" }}
-        >
-          {loading ? "Executing…" : "Confirm"}
+        <button onClick={handleApprove} disabled={loading}
+          className="flex-1 py-2.5 rounded-lg text-[12px] font-semibold transition-all disabled:opacity-40"
+          style={{ background: "var(--blue)", color: "#fff", boxShadow: "0 2px 10px rgba(61,127,255,0.3)" }}>
+          {loading ? "Executing\u2026" : "Approve"}
         </button>
       </div>
     </div>
