@@ -200,7 +200,7 @@ export default function ChatPanel() {
   const canSend = input.trim().length > 0 && !loading && !listening;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden" style={{ background: "var(--bg)" }}>
+    <div className="flex flex-col h-full overflow-hidden" style={{ background: "var(--surface)" }}>
 
       {/* ── Messages ── */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
@@ -211,7 +211,7 @@ export default function ChatPanel() {
               {msg.role === "system" ? (
                 <div className="flex items-center gap-3 w-full my-1">
                   <div className="h-px flex-1" style={{ background: "var(--border)" }} />
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-3)" }}>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-2)" }}>
                     {msg.content}
                   </span>
                   <div className="h-px flex-1" style={{ background: "var(--border)" }} />
@@ -223,7 +223,7 @@ export default function ChatPanel() {
                 </div>
               ) : (
                 <div className="px-4 py-2.5 rounded-2xl rounded-bl-sm text-[14px] leading-relaxed"
-                  style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--border)", borderLeft: "2px solid var(--blue)" }}>
+                  style={{ background: "var(--surface-2)", color: "var(--text)", border: "1px solid var(--border-2)", borderLeft: "2px solid var(--blue)" }}>
                   {msg.content}
                 </div>
               )}
@@ -257,7 +257,7 @@ export default function ChatPanel() {
       </div>
 
       {/* ── Input bar ── */}
-      <div className="shrink-0 px-4 py-3" style={{ background: "var(--surface)", borderTop: "1px solid var(--border)" }}>
+      <div className="shrink-0 px-4 py-3" style={{ background: "var(--surface-2)", borderTop: "1.5px solid var(--border-2)" }}>
 
         {/* Status hint above input when listening */}
         {listening && (
@@ -290,11 +290,11 @@ export default function ChatPanel() {
               disabled={loading}
               className="w-full rounded-xl px-4 py-2.5 text-[13px] outline-none transition-all duration-150 disabled:opacity-50"
               style={{
-                background: "var(--surface-2)",
+                background: "var(--surface-3)",
                 color: "var(--text)",
                 border: listening
                   ? "1.5px solid rgba(61,127,255,0.6)"
-                  : "1px solid var(--border)",
+                  : "1px solid var(--border-2)",
                 boxShadow: listening ? "0 0 0 3px rgba(61,127,255,0.1)" : "none",
               }}
             />
