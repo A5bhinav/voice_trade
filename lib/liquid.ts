@@ -82,7 +82,7 @@ function buildHeaders(method: string, path: string, body = ""): HeadersInit {
   const apiSecret = process.env.LIQUID_API_SECRET;
   if (!apiKey || !apiSecret) throw new Error("LIQUID_API_KEY and LIQUID_API_SECRET must be set");
 
-  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const timestamp = Date.now().toString(); // Liquid expects milliseconds
   // 32-char lowercase hex nonce (matches secrets.token_hex(16) in Python SDK)
   const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)))
     .map((b) => b.toString(16).padStart(2, "0"))
