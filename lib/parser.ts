@@ -26,13 +26,14 @@ export async function parseCommand(text: string): Promise<ParseResult> {
 
   try {
     const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("market-fetch timeout")), 5000)
+      setTimeout(() => reject(new Error("market-fetch timeout")), 6000)
     );
-    const { markets, context } = await Promise.race([LiquidClient.getMarketWithPrices(), timeout]);
+    const markets = await Promise.race([LiquidClient.getMarkets(), timeout]);
     if (markets.length > 0) {
-      marketContext = context;
-    } else {
-      console.warn("[parser] getMarketWithPrices returned 0 markets — using fallback");
+      marketContext = markets.map((m) => {
+        const lev = m.max_leverage ? ` (max ${m.max_leverage}x)` : "";
+        return `${m.symbol}${lev}`;
+      }).join("\n");
     }
   } catch (err) {
     console.warn("[parser] Failed to fetch markets from Liquid — using fallback:", (err as Error).message);
