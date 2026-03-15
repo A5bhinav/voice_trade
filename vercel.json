@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/command/parse/route.ts": { "maxDuration": 30 },
+    "app/api/rebalance/**": { "maxDuration": 30 },
+    "app/api/command/execute/route.ts": { "maxDuration": 30 }
+  }
+}

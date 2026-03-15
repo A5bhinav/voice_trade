@@ -25,18 +25,24 @@ export async function parseCommand(text: string): Promise<ParseResult> {
   let marketContext = "BTC-PERP, ETH-PERP, SOL-PERP (fallback — Liquid unreachable)";
 
   try {
-    const { markets, context } = await LiquidClient.getMarketWithPrices();
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("market-fetch timeout")), 5000)
+    );
+    const { markets, context } = await Promise.race([LiquidClient.getMarketWithPrices(), timeout]);
     if (markets.length > 0) {
       marketContext = context;
     } else {
       console.warn("[parser] getMarketWithPrices returned 0 markets — using fallback");
     }
   } catch (err) {
-    console.error("[parser] Failed to fetch markets from Liquid — using fallback:", err);
+    console.warn("[parser] Failed to fetch markets from Liquid — using fallback:", (err as Error).message);
   }
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY is not set");
+  }
   const anthropic = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY || "",
+    apiKey: process.env.ANTHROPIC_API_KEY,
   });
 
   const tradeCommandSchema = {
